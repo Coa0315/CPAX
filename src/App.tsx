@@ -25,6 +25,7 @@ import { CpaxExamReports } from './components/CpaxExamReports';
 import { CpaxFrameworkComponent } from './components/CpaxFramework';
 import { CpaxBackup } from './components/CpaxBackup';
 import { CpaxCountdown } from './components/CpaxCountdown';
+import { CpaxLogo } from './components/CpaxLogo';
 
 export default function App() {
   // Navigation state: dashboard, content_tree, timer, calendar, reports, framework, backup
@@ -337,14 +338,8 @@ export default function App() {
       <aside className="w-full md:w-64 bg-slate-950 text-white shrink-0 shadow-xl md:min-h-screen flex flex-col justify-between no-print border-r border-slate-900">
         <div className="p-5 space-y-6">
           {/* Logo Brand Zone */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-950/40">
-              <Compass className="w-5.5 h-5.5 text-white" />
-            </div>
-            <div>
-              <span className="font-sans font-black tracking-tight text-lg text-white block">CPAX</span>
-              <p className="text-[9px] font-bold text-slate-400 tracking-wider">For CPA Excellence</p>
-            </div>
+          <div className="flex items-center">
+            <CpaxLogo variant="full" size={38} />
           </div>
 
           {/* Navigation Links */}

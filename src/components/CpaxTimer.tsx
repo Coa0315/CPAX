@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Play, Pause, RotateCcw, CheckCircle, Clock, Award, Sparkles, Smile, HelpCircle, Frown, Plus, Minus } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle, Clock, Award, Sparkles, Smile, HelpCircle, Frown, Plus, Minus, Info, Meh } from 'lucide-react';
 import { CpaxTopic, CpaxSchedule } from '../types';
 
 interface CpaxTimerProps {
@@ -83,6 +83,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
   // Timer run tracking states
   const [isRunning, setIsRunning] = useState(false);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
+  const [showTimerHelp, setShowTimerHelp] = useState(false);
 
   // Background iOS / Sleep freeze proof architecture using high-precision UTC offsets
   const startTimeRef = useRef<number | null>(null);
@@ -199,14 +200,32 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden" id="cpax-interactive-timer">
-      <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white p-6 p-y-8 text-left">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-900/50 rounded-xl border border-indigo-700/30">
-            <Clock className="w-5 h-5 text-indigo-400" />
-          </div>
-          <div>
-            <h2 className="font-sans font-black text-lg tracking-tight uppercase">論点連動デジタルタイマー</h2>
-            <p className="text-[11px] text-slate-400 font-bold">iPadスリープ中も時間を狂わせず1秒単位で正確に時間測定</p>
+      <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white p-5 text-left">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-900/50 rounded-xl border border-indigo-700/30">
+              <Clock className="w-5 h-5 text-indigo-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="font-sans font-black text-sm sm:text-base tracking-tight uppercase">論点連動デジタルタイマー</h2>
+                <button
+                  type="button"
+                  onClick={() => setShowTimerHelp(!showTimerHelp)}
+                  className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-indigo-200 cursor-pointer transition-all border border-white/5 active-scale flex items-center justify-center"
+                  title="計測仕様について"
+                >
+                  <Info className="w-3.5 h-3.5 text-indigo-300" />
+                </button>
+              </div>
+              {showTimerHelp ? (
+                <p className="text-[10px] text-slate-300 leading-relaxed mt-1 animate-scale-in max-w-xl bg-slate-950/40 p-2 rounded-lg border border-indigo-500/20">
+                  バックグラウンド計測・実時刻オフセット差分検知（Date.now()）を搭載。iPadが省電力スリープや画面ロックに入っても、内部クロックと同期してズレなく正確に学習時間を測定し、論点に紐付けて履歴(cpax_history)へ格納します。
+                </p>
+              ) : (
+                <p className="text-[10px] text-slate-400 mt-1 font-bold">iPadスリープ中も時間を狂わせず1秒単位で正確に時間測定</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -434,7 +453,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
                       }`}
                     >
                       {lev === 'good' && <Smile className="w-4 h-4 shrink-0" />}
-                      {lev === 'average' && <HelpCircle className="w-4 h-4 shrink-0" />}
+                      {lev === 'average' && <Meh className="w-4 h-4 shrink-0" />}
                       {lev === 'poor' && <Frown className="w-4 h-4 shrink-0" />}
                       <span>{lev === 'good' ? '◯ 良好' : lev === 'average' ? '△ 微妙' : '✕ やばい'}</span>
                     </button>
