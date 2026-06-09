@@ -215,7 +215,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               onClick={() => onModeToggle('short')}
               className={`py-2 text-[11px] font-bold rounded-lg cursor-pointer transition-all active-scale ${
                 currentMode === 'short'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20'
+                  ? 'bg-[#274a78] text-white shadow-lg shadow-[#274a78]/20'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -225,7 +225,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               onClick={() => onModeToggle('essay')}
               className={`py-2 text-[11px] font-bold rounded-lg cursor-pointer transition-all active-scale ${
                 currentMode === 'essay'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20'
+                  ? 'bg-[#274a78] text-white shadow-lg shadow-[#274a78]/20'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -325,7 +325,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
             return (
               <div className={`border rounded-2xl p-4 shadow-sm text-left bg-gradient-to-br relative overflow-hidden transition-all duration-300 ${colorClass}`}>
                 <div className="flex items-center justify-between gap-1 mb-1">
-                  <span className={`block text-[8px] font-bold uppercase tracking-widest leading-none ${isNearing ? 'text-rose-700' : 'text-indigo-600'}`}>
+                  <span className={`block text-[8px] font-bold uppercase tracking-widest leading-none ${isNearing ? 'text-rose-700' : 'text-[#274a78]'}`}>
                     SHORT-TERM TARGET
                   </span>
                   <button
@@ -334,10 +334,10 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                       e.stopPropagation();
                       setShowShortTermModal(true);
                     }}
-                    className="p-1 px-1.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold transition-all hover:scale-105 active-scale cursor-pointer flex items-center gap-0.5 text-[8.5px] border border-indigo-150/40 shrink-0"
+                    className="p-1 px-1.5 rounded bg-[#274a78]/10 hover:bg-[#274a78]/20 text-[#274a78] font-extrabold transition-all hover:scale-105 active-scale cursor-pointer flex items-center gap-0.5 text-[8.5px] border border-[#274a78]/20 shrink-0"
                     title="短期目標の管理・選択"
                   >
-                    <Settings className="w-2.5 h-2.5 text-indigo-600" />
+                    <Settings className="w-2.5 h-2.5 text-[#274a78]" />
                     <span>目標選択</span>
                   </button>
                 </div>
@@ -646,7 +646,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
           <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100/80 p-5 space-y-4 animate-scale-in text-slate-800">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-indigo-600" />
+                <Calendar className="w-5 h-5 text-[#274a78]" />
                 <h3 className="font-sans font-black text-sm text-slate-900">
                   短期目標カウントダウン管理
                 </h3>
@@ -680,14 +680,14 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                       onClick={() => handleSelectSTTarget(t.id)}
                       className={`p-2.5 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
                         isSelected
-                          ? 'bg-indigo-50/50 border-indigo-600 text-indigo-950 font-bold'
+                          ? 'bg-[#274a78]/5 border-[#274a78] text-slate-950 font-bold'
                           : 'bg-white border-slate-100 text-slate-700 hover:border-slate-200'
                       }`}
                     >
                       <div className="space-y-1 overflow-hidden">
                         <div className="flex items-center gap-1.5">
                           {isSelected ? (
-                            <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse shrink-0" />
+                            <span className="w-2 h-2 rounded-full bg-[#274a78] animate-pulse shrink-0" />
                           ) : (
                             <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
                           )}
@@ -704,7 +704,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                             ? 'bg-slate-100 text-slate-400'
                             : daysLeft <= 15
                               ? 'bg-rose-100 text-rose-700'
-                              : 'bg-indigo-100 text-indigo-700'
+                              : 'bg-[#274a78]/10 text-[#274a78]'
                         }`}>
                           {daysLeft < 0 ? '終了' : `あと ${daysLeft}日`}
                         </span>
@@ -742,7 +742,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     placeholder="例: 第1回 論文答練"
                     value={newSTTitle}
                     onChange={(e) => setNewSTTitle(e.target.value)}
-                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-indigo-500 rounded-lg p-1.5 text-xs font-bold focus:outline-none"
+                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-[#274a78] rounded-lg p-1.5 text-xs font-bold focus:outline-none"
                   />
                 </div>
 
@@ -753,7 +753,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     required
                     value={newSTDate}
                     onChange={(e) => setNewSTDate(e.target.value)}
-                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-indigo-500 rounded-lg p-1.5 text-xs font-mono font-bold focus:outline-none"
+                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-[#274a78] rounded-lg p-1.5 text-xs font-mono font-bold focus:outline-none"
                   />
                 </div>
               </div>
@@ -762,7 +762,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                 type="submit"
                 className="w-full bg-indigo-950 hover:bg-slate-900 text-white p-2.5 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all shadow-md active-scale cursor-pointer"
               >
-                <Plus className="w-4 h-4 text-indigo-300" />
+                <Plus className="w-4 h-4 text-slate-300" />
                 <span>短期目標を追加 & 選択</span>
               </button>
             </form>

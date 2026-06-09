@@ -349,7 +349,7 @@ export default function App() {
               onClick={() => setCurrentView('dashboard')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'dashboard'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 font-extrabold'
+                  ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
@@ -362,7 +362,7 @@ export default function App() {
               onClick={() => setCurrentView('content_tree')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'content_tree'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 font-extrabold'
+                  ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
@@ -375,7 +375,7 @@ export default function App() {
               onClick={() => setCurrentView('timer')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'timer'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 font-extrabold'
+                  ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
@@ -388,7 +388,7 @@ export default function App() {
               onClick={() => setCurrentView('calendar')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'calendar'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 font-extrabold'
+                  ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
@@ -401,7 +401,7 @@ export default function App() {
               onClick={() => setCurrentView('reports')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'reports'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 font-extrabold'
+                  ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
@@ -414,7 +414,7 @@ export default function App() {
               onClick={() => setCurrentView('framework')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'framework'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 font-extrabold'
+                  ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
@@ -427,7 +427,7 @@ export default function App() {
               onClick={() => setCurrentView('backup')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'backup'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50 font-extrabold'
+                  ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
