@@ -1,0 +1,6 @@
+{
+  "name": "CPAX",
+  "description": "公認会計士受験生専用の戦略管理Webアプリ。すべての実績データを目次ID（cpaxTopicId）で一本の串のように連動させ、超効率的な学習PDCAループを確立します。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
