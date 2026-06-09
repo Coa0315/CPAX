@@ -47,6 +47,53 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
   const [timeInput, setTimeInput] = useState('09:00');
   const [minutesInput, setMinutesInput] = useState<number>(60); // 用事の目安時間(分), 勉強目標(分)
 
+  // CPAX マスター連携検索用の状態
+  const [searchSubject, setSearchSubject] = useState<string>('all');
+  const [searchTextbook, setSearchTextbook] = useState<string>('all');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+
+  // 検索・フィルタリング用の選択可能リスト
+  const availableSubjectsForSearch = useMemo(() => {
+    const list = Array.from(new Set(topics.map(t => t.subject)));
+    if (currentMode === 'short') {
+      return list.filter(s => s !== '租税法' && s !== '経営学');
+    }
+    return list;
+  }, [topics, currentMode]);
+
+  const availableTextbooksForSearch = useMemo(() => {
+    const filtered = topics.filter(t => {
+      if (currentMode === 'short') {
+        if (t.isEssayOnly || t.subject === '租税法' || t.subject === '経営学') return false;
+      }
+      if (searchSubject !== 'all' && t.subject !== searchSubject) return false;
+      return true;
+    });
+    return Array.from(new Set(filtered.map(t => t.textbook || 'テキスト1'))).filter(Boolean);
+  }, [topics, searchSubject, currentMode]);
+
+  // 絞り込まれた論点のリスト
+  const filteredTopicsForSelect = useMemo(() => {
+    return topics.filter(t => {
+      // 短答マスク
+      if (currentMode === 'short') {
+        if (t.isEssayOnly || t.subject === '租税法' || t.subject === '経営学') return false;
+      }
+      // 科目一致
+      if (searchSubject !== 'all' && t.subject !== searchSubject) return false;
+      // テキスト一致
+      if (searchTextbook !== 'all' && (t.textbook || 'テキスト1') !== searchTextbook) return false;
+      // キーワード一致
+      if (searchKeyword.trim() !== '') {
+        const word = searchKeyword.toLowerCase();
+        const matchesName = t.name.toLowerCase().includes(word);
+        const matchesCategory = t.category.toLowerCase().includes(word);
+        return matchesName || matchesCategory;
+      }
+      return true;
+    });
+  }, [topics, searchSubject, searchTextbook, searchKeyword, currentMode]);
+
   // -------------------------------------------------------------
   // Load CPA Method Framework V2 priority Tasks dynamically
   // -------------------------------------------------------------
@@ -543,37 +590,80 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
 
           {category === 'study' ? (
             <div className="space-y-4">
-              <div>
-                <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">CPAX 目次マスター連携</label>
-                <select
-                  value={associatedTopicId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setAssociatedTopicId(id);
-                    const topicObj = topics.find(t => t.id === id);
-                    if (topicObj) {
-                      setTitle(`[${topicObj.subject}] ${topicObj.name}`);
-                      setMinutesInput(topicObj.estimatedMinutes || 45); // 指標目安時間を自動インジェクション
-                    } else {
-                      setTitle('');
-                    }
-                  }}
-                  className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl p-2 text-xs font-bold focus:outline-none truncate min-h-[44px]"
-                >
-                  <option value="">-- 自習（目次に紐付けないフリー勉強） --</option>
-                  {topics
-                    .filter(t => {
-                      if (currentMode === 'short') {
-                        return !t.isEssayOnly && t.subject !== '租税法' && t.subject !== '経営学';
+              <div className="bg-slate-100/60 border border-slate-200/50 p-3 rounded-2xl space-y-2.5">
+                <span className="text-[9px] font-black tracking-widest text-indigo-600 block">🔍 連携データの検索 & 絞り込み</span>
+                
+                {/* 検索コントロール群 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[8px] font-bold text-slate-400 mb-0.5">科目</label>
+                    <select
+                      value={searchSubject}
+                      onChange={(e) => {
+                        setSearchSubject(e.target.value);
+                        setSearchTextbook('all'); // 科目が変わったらテキストを初期化
+                      }}
+                      className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-[10px] font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
+                    >
+                      <option value="all">すべて</option>
+                      {availableSubjectsForSearch.map(sub => (
+                        <option key={sub} value={sub}>{sub}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[8px] font-bold text-slate-400 mb-0.5">テキスト・教材</label>
+                    <select
+                      value={searchTextbook}
+                      onChange={(e) => setSearchTextbook(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-[10px] font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
+                    >
+                      <option value="all">すべて</option>
+                      {availableTextbooksForSearch.map(tb => (
+                        <option key={tb} value={tb}>{tb}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[8px] font-bold text-slate-400 mb-0.5">キーワード検索 (論点名、目次など)</label>
+                  <input
+                    type="text"
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                    placeholder="例: リース、連結、問題番号..."
+                    className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-[10px] font-bold focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                {/* 最終セレクトボックス */}
+                <div className="pt-1.5 border-t border-dashed border-slate-200">
+                  <label className="block text-[8px] font-extrabold text-slate-400 mb-1">CPAX 目次マスター連携（候補: {filteredTopicsForSelect.length}件）</label>
+                  <select
+                    value={associatedTopicId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setAssociatedTopicId(id);
+                      const topicObj = topics.find(t => t.id === id);
+                      if (topicObj) {
+                        setTitle(`[${topicObj.subject}] ${topicObj.name}`);
+                        setMinutesInput(topicObj.estimatedMinutes || 45); // 指標目安時間を自動インジェクション
+                      } else {
+                        setTitle('');
                       }
-                      return true;
-                    })
-                    .map(t => (
+                    }}
+                    className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-lg p-2 text-xs font-bold focus:outline-none truncate"
+                  >
+                    <option value="">-- 自習（目次に紐付けないフリー勉強） --</option>
+                    {filteredTopicsForSelect.map(t => (
                       <option key={t.id} value={t.id}>
-                        [{t.subject}] {t.name}
+                        [{t.subject}] {t.textbook || 'テキスト'} ➜ {t.name}
                       </option>
                     ))}
-                </select>
+                  </select>
+                </div>
               </div>
 
               <div>

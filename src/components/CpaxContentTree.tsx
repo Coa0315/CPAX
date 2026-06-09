@@ -1321,8 +1321,32 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
 
                                                           <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold">
                                                             <span className="flex items-center gap-1">
-                                                              <Clock className="w-3 h-3 text-slate-300" />
-                                                              標準: {topic.estimatedMinutes || 45}分
+                                                              <Clock className="w-3 h-3 text-slate-300 shrink-0" />
+                                                              <span>標準:</span>
+                                                              <input
+                                                                type="number"
+                                                                min="1"
+                                                                max="999"
+                                                                value={topic.estimatedMinutes === 0 ? "" : (topic.estimatedMinutes ?? 45)}
+                                                                onChange={(e) => {
+                                                                  const val = e.target.value;
+                                                                  const mins = val === "" ? 0 : parseInt(val);
+                                                                  const updated = topics.map(t => t.id === topic.id ? { ...t, estimatedMinutes: isNaN(mins) ? 0 : mins } : t);
+                                                                  onUpdateTopics(updated);
+                                                                }}
+                                                                onBlur={() => {
+                                                                  if (!topic.estimatedMinutes || topic.estimatedMinutes === 0) {
+                                                                    const updated = topics.map(t => t.id === topic.id ? { ...t, estimatedMinutes: 45 } : t);
+                                                                    onUpdateTopics(updated);
+                                                                  }
+                                                                }}
+                                                                className="w-11 bg-slate-50 border border-slate-200 hover:bg-white focus:bg-white rounded px-1 py-0.5 text-center font-extrabold text-slate-800 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-650/20 transition-all cursor-pointer shrink-0"
+                                                                title="標準学習時間をその場で直接変更"
+                                                              />
+                                                              <span>分</span>
+                                                              {(topic.estimatedMinutes || 45) !== 45 && (
+                                                                <span className="text-[8px] bg-indigo-50 text-indigo-600 px-1 py-0.5 rounded ml-0.5 font-bold">カスタム</span>
+                                                              )}
                                                             </span>
                                                             {stats.totalMinutes > 0 && (
                                                               <span className="text-slate-500">
