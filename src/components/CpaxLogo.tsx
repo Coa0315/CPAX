@@ -17,7 +17,7 @@ export const CpaxLogo: React.FC<CpaxLogoProps> = ({
   variant = 'icon-only'
 }) => {
   // Pure SVG representation of the CPAX logo
-  // Semi-circular "C" in violet/indigo gradient interlocking with a sharp, bold white metallic "X"
+  // Centered beautiful "C" shape using #274a78 and deep blacks plus high contrast light accents, reflecting "Axis" core
   const renderSvg = () => (
     <svg
       width="100%"
@@ -28,72 +28,85 @@ export const CpaxLogo: React.FC<CpaxLogoProps> = ({
       className="select-none"
     >
       <defs>
-        {/* Glow and shadow filter for high-contrast touch look */}
-        <filter id="c-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="6" result="blur" />
+        {/* Soft elegant backing aura for the C */}
+        <filter id="c-brand-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="15" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
 
-        {/* CPAX Brand Blue (#274a78) Metallic Gradient */}
-        <linearGradient id="gradient-c-outer" x1="110" y1="120" x2="270" y2="280" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#4e7ebc" />
-          <stop offset="40%" stopColor="#274a78" />
-          <stop offset="85%" stopColor="#142a4a" />
-          <stop offset="100%" stopColor="#081324" />
-        </linearGradient>
-        
-        <linearGradient id="gradient-c-inner" x1="120" y1="130" x2="250" y2="260" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#729ed2" />
-          <stop offset="50%" stopColor="#274a78" />
-          <stop offset="100%" stopColor="#081324" />
-        </linearGradient>
-
-        {/* Premium Silver Chrome Gradient for the "X" */}
-        <linearGradient id="gradient-x-chrome" x1="210" y1="120" x2="380" y2="280" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="30%" stopColor="#f1f5f9" />
-          <stop offset="70%" stopColor="#cbd5e1" />
-          <stop offset="100%" stopColor="#94a3b8" />
-        </linearGradient>
-
-        {/* Shadow for overlap */}
-        <filter id="drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="-2" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.6" />
+        {/* High contrast sharp shadow for elements elevation */}
+        <filter id="c-sharp-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="-2" dy="6" stdDeviation="8" floodColor="#000000" floodOpacity="0.8" />
         </filter>
+
+        {/* #274a78 Deep Luxury Brand Blue Gradient for "C" motif */}
+        <linearGradient id="c-brand-blue" x1="120" y1="120" x2="392" y2="392" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#5b8ecc" />
+          <stop offset="35%" stopColor="#274a78" />
+          <stop offset="70%" stopColor="#0f223d" />
+          <stop offset="100%" stopColor="#040a12" />
+        </linearGradient>
+
+        {/* Highlight Gradient for Inner Crescent bevel */}
+        <linearGradient id="c-inner-highlight" x1="140" y1="140" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#9abcfa" />
+          <stop offset="50%" stopColor="#274a78" />
+          <stop offset="100%" stopColor="#000000" />
+        </linearGradient>
+
+        {/* Silver Core Axis Rod (The thread of study) */}
+        <linearGradient id="axis-silver" x1="256" y1="90" x2="256" y2="422" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.1" />
+          <stop offset="30%" stopColor="#f8fafc" />
+          <stop offset="50%" stopColor="#94a3b8" />
+          <stop offset="70%" stopColor="#1e293b" />
+          <stop offset="100%" stopColor="#020617" stopOpacity="0.9" />
+        </linearGradient>
       </defs>
 
-      {/* The "C" Crescent (Left-aligned interlocking loop) */}
-      <path
-        d="M 264,160 A 80,80 0 1,0 264,240 L 240,226 A 52,52 0 1,1 240,174 Z"
-        fill="url(#gradient-c-outer)"
-        filter="url(#c-glow)"
-      />
-      <path
-        d="M 262,165 A 75,75 0 1,0 262,235 L 241,223 A 49,49 0 1,1 241,177 Z"
-        fill="url(#gradient-c-inner)"
-        opacity="0.9"
+      {/* Behind Ambient Glow of Blue */}
+      <circle cx="210" cy="256" r="110" fill="#274a78" opacity="0.32" filter="url(#c-brand-glow)" />
+
+      {/* Axis Backbone Line (The Injection Core) */}
+      <rect
+        x="248"
+        y="80"
+        width="16"
+        height="352"
+        rx="8"
+        fill="url(#axis-silver)"
+        filter="url(#c-sharp-shadow)"
       />
 
-      {/* The "X" Chrome Loop - Overlapping Blade 1 (Top-Left to Bottom-Right) */}
+      {/* "C" Crescent Shape Body (Design Axis, Thick on Left, Shaded gracefully on ends) */}
       <path
-        d="M 215,120 C 235,120 315,220 365,270 C 375,280 375,290 365,290 L 350,290 C 310,290 220,185 200,140 C 195,130 200,120 215,120 Z"
-        fill="url(#gradient-x-chrome)"
-        filter="url(#drop-shadow)"
+        d="M 364,136 
+           C 292,136 142,168 142,256 
+           C 142,344 292,376 364,376 
+           L 342,336 
+           C 292,336 190,312 190,256 
+           C 190,200 292,176 342,176 
+           Z"
+        fill="url(#c-brand-blue)"
+        filter="url(#c-sharp-shadow)"
       />
 
-      {/* The "X" Chrome Loop - Overlapping Blade 2 (Bottom-Left to Top-Right) */}
+      {/* Secondary Inner Fine Crease for Multi-Material look */}
       <path
-        d="M 215,280 C 235,280 315,180 365,130 C 375,120 375,110 365,110 L 350,110 C 310,110 220,215 200,260 C 195,270 200,280 215,280 Z"
-        fill="url(#gradient-x-chrome)"
-        filter="url(#drop-shadow)"
+        d="M 346,156 
+           C 290,156 168,186 168,256 
+           C 168,326 290,356 346,356 
+           L 336,336 
+           C 286,336 200,312 200,256 
+           C 200,200 286,176 336,176 
+           Z"
+        fill="url(#c-inner-highlight)"
+        opacity="0.8"
       />
 
-      {/* The "Interlock accent" to bind them inside visually */}
-      <path
-        d="M 252,192 L 273,212 L 253,212 Z"
-        fill="#ffffff"
-        opacity="0.9"
-      />
+      {/* Center Dynamic Target Sparkle (Intersection of Success) */}
+      <circle cx="256" cy="256" r="8" fill="#ffffff" filter="url(#c-brand-glow)" />
+      <polygon points="256,242 260,252 270,256 260,260 256,270 252,260 242,256 252,252" fill="#ffffff" />
     </svg>
   );
 
