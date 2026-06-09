@@ -214,6 +214,11 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
     return Array.from(new Set(matched.map(t => t.category)));
   }, [topics, currentMode]);
 
+  // Derived unique Textbook names based on topics list
+  const existingTextbooks = useMemo(() => {
+    return Array.from(new Set(topics.map(t => t.textbook || 'テキスト1'))).filter(Boolean);
+  }, [topics]);
+
   // 2. QUADRUPLE DATA HIERARCHY STRUCTURE GENERATOR
   // Groupings layout: Subject -> Textbook -> Chapter (Category) -> Topics Array
   const structuredData = useMemo(() => {
@@ -285,94 +290,145 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
       return;
     }
 
-    const lines = importText.split('\n');
+    const rawLines = importText.split('\n');
     let currentSubject = importDefaultSubject;
     let currentTextbook = importDefaultTextbook.trim() || 'テキスト1';
-    let currentChapter = '基本目次';
-    let currentSection = '';
-    const parsedTopics: CpaxTopic[] = [];
+    
+    interface ParsedItem {
+      indent: number;
+      cleanLine: string;
+    }
+    
+    const parsedLines: ParsedItem[] = [];
+    rawLines.forEach(line => {
+      let indentWeight = 0;
+      let i = 0;
+      while (i < line.length) {
+        if (line[i] === '　') {
+          indentWeight += 1;
+          i++;
+        } else if (line[i] === '\t') {
+          indentWeight += 1;
+          i++;
+        } else if (line[i] === ' ' && line[i+1] === ' ') {
+          indentWeight += 1;
+          i += 2;
+        } else if (line[i] === ' ') {
+          indentWeight += 0.5;
+          i++;
+        } else {
+          break;
+        }
+      }
+      const indent = Math.floor(indentWeight);
+      const cleanLine = line.substring(i).trim();
+      if (cleanLine) {
+        parsedLines.push({ indent, cleanLine });
+      }
+    });
 
-    // Filter exclusions
+    const parsedTopics: CpaxTopic[] = [];
     const skipSubjects = currentMode === 'short' ? ['租税法', '経営学'] : [];
 
-    lines.forEach(line => {
-      let indentWeight = 0;
-      let temp = line;
+    // Group lines by Chapters.
+    // A Chapter starts at indent 0 (unless it's an explicit Subject or Textbook override).
+    interface ChapterBlock {
+      chapterName: string;
+      lines: ParsedItem[];
+    }
 
-      // Extract space indent count from raw sequence
-      while (temp.startsWith('　') || temp.startsWith('  ') || temp.startsWith('\t') || temp.startsWith(' ')) {
-        if (temp.startsWith('　')) {
-          indentWeight += 1;
-          temp = temp.substring(1);
-        } else if (temp.startsWith('\t')) {
-          indentWeight += 1;
-          temp = temp.substring(1);
-        } else if (temp.startsWith('  ')) {
-          indentWeight += 1;
-          temp = temp.substring(2);
-        } else {
-          indentWeight += 0.5;
-          temp = temp.substring(1);
-        }
-      }
+    const chapters: ChapterBlock[] = [];
+    let currentChapterBlock: ChapterBlock | null = null;
 
-      const indent = Math.floor(indentWeight);
-      const cleanLine = temp.trim();
-      if (!cleanLine) return;
+    const knownSubjects = [
+      '財務会計論(計算)', '財務会計論（計算）', '財務会計論(理論)', '財務会計論（理論）',
+      '管理会計論', '監査論', '企業法', '租税法', '経営学'
+    ];
 
-      // Subject recognition override
-      const knownSubjects = [
-        '財務会計論(計算)', '財務会計論（計算）', '財務会計論(理論)', '財務会計論（理論）',
-        '管理会計論', '監査論', '企業法', '租税法', '経営学'
-      ];
-      const matchedSub = knownSubjects.find(s => cleanLine === s || cleanLine.replace(/[（）]/g, '()') === s);
+    parsedLines.forEach(item => {
+      const matchedSub = knownSubjects.find(s => 
+        item.cleanLine === s || item.cleanLine.replace(/[（）]/g, '()') === s
+      );
 
-      if (indent === 0) {
+      if (item.indent === 0) {
         if (matchedSub) {
           currentSubject = matchedSub.replace('（', '(').replace('）', ')');
-        } else if (cleanLine.startsWith('テキスト') || cleanLine.includes('講義')) {
-          currentTextbook = cleanLine;
+        } else if (item.cleanLine.startsWith('テキスト') || item.cleanLine.includes('講義')) {
+          currentTextbook = item.cleanLine;
         } else {
-          currentChapter = cleanLine;
-          currentSection = '';
-        }
-      } else if (indent === 1) {
-        currentTextbook = cleanLine;
-      } else if (indent === 2 || (indent === 0 && cleanLine.startsWith('第') && cleanLine.includes('章'))) {
-        currentChapter = cleanLine;
-        currentSection = '';
-      } else if (indent === 3) {
-        const isSection = cleanLine.startsWith('第') && (cleanLine.includes('節') || cleanLine.includes('講') || cleanLine.includes('項'));
-        if (isSection) {
-          currentSection = cleanLine;
-        } else {
-          if (!skipSubjects.includes(currentSubject)) {
-            parsedTopics.push({
-              id: `cpt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-              subject: currentSubject,
-              textbook: currentTextbook,
-              category: currentChapter,
-              name: cleanLine,
-              estimatedMinutes: 45,
-              isEssayOnly: currentSubject === '租税法' || currentSubject === '経営学' ? true : undefined
-            });
-          }
+          // Chapter
+          currentChapterBlock = {
+            chapterName: item.cleanLine,
+            lines: []
+          };
+          chapters.push(currentChapterBlock);
         }
       } else {
-        // Indent weight 4+ represents actual sub-topics/problems
-        const finalCategory = currentSection ? `${currentChapter} ${currentSection}` : currentChapter;
-        if (!skipSubjects.includes(currentSubject)) {
-          parsedTopics.push({
-            id: `cpt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-            subject: currentSubject,
-            textbook: currentTextbook,
-            category: finalCategory,
-            name: cleanLine,
-            estimatedMinutes: 45,
-            isEssayOnly: currentSubject === '租税法' || currentSubject === '経営学' ? true : undefined
-          });
+        if (!currentChapterBlock) {
+          currentChapterBlock = {
+            chapterName: '基本目次',
+            lines: []
+          };
+          chapters.push(currentChapterBlock);
         }
+        currentChapterBlock.lines.push(item);
       }
+    });
+
+    chapters.forEach(block => {
+      const chapterName = block.chapterName;
+      // To satisfy user rule:
+      // ・節（第1節など）※もし目次にあれば：全角スペース1個（1マス）
+      // Check if there is a section in indent === 1
+      const hasSectionInBlock = block.lines.some(item => 
+        item.indent === 1 && 
+        (item.cleanLine.startsWith('第') && (item.cleanLine.includes('節') || item.cleanLine.includes('講') || item.cleanLine.includes('項')))
+      );
+
+      let currentSection = '';
+
+      block.lines.forEach(item => {
+        if (hasSectionInBlock) {
+          // If there is a section header:
+          // indent === 1 and resembles section is a Section!
+          const isSectionLine = item.indent === 1 && 
+            (item.cleanLine.startsWith('第') && (item.cleanLine.includes('節') || item.cleanLine.includes('講') || item.cleanLine.includes('項')));
+          
+          if (isSectionLine) {
+            currentSection = item.cleanLine;
+          } else if (item.indent >= 1) {
+            // Detailed problem (normally at 2 spaces, but process any non-section indent as sub-item)
+            const finalCategory = currentSection ? `${chapterName} ${currentSection}` : chapterName;
+            if (!skipSubjects.includes(currentSubject)) {
+              parsedTopics.push({
+                id: `cpt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                subject: currentSubject,
+                textbook: currentTextbook,
+                category: finalCategory,
+                name: item.cleanLine,
+                estimatedMinutes: 45,
+                isEssayOnly: currentSubject === '租税法' || currentSubject === '経営学' ? true : undefined
+              });
+            }
+          }
+        } else {
+          // If there are no sections:
+          // any item with indent >= 1 is a detail/problem under the chapter!
+          if (item.indent >= 1) {
+            if (!skipSubjects.includes(currentSubject)) {
+              parsedTopics.push({
+                id: `cpt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                subject: currentSubject,
+                textbook: currentTextbook,
+                category: chapterName,
+                name: item.cleanLine,
+                estimatedMinutes: 45,
+                isEssayOnly: currentSubject === '租税法' || currentSubject === '経営学' ? true : undefined
+              });
+            }
+          }
+        }
+      });
     });
 
     if (parsedTopics.length === 0) {
@@ -714,28 +770,58 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
               
               {/* Form options block */}
               <div className="bg-slate-50 border border-slate-150/70 p-4 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">【1】科目選択（必須）</label>
-                  <select
-                    value={importDefaultSubject}
-                    onChange={(e) => setImportDefaultSubject(e.target.value)}
-                    className="w-full bg-white border border-slate-200 focus:border-indigo-650 rounded-xl px-3 py-2.5 font-bold text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-650/20"
-                  >
-                    {availableSubjects.map(sub => (
-                      <option key={sub} value={sub}>{sub}</option>
-                    ))}
-                  </select>
+                <div className="space-y-2">
+                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">【1】科目選択、または直接入力（必須）</label>
+                  <div className="space-y-1.5 font-bold">
+                    <select
+                      value={availableSubjects.includes(importDefaultSubject) ? importDefaultSubject : ""}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setImportDefaultSubject(e.target.value);
+                        }
+                      }}
+                      className="w-full bg-white border border-slate-200 focus:border-indigo-650 rounded-xl px-3 py-2 font-bold text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-650/20 cursor-pointer"
+                    >
+                      <option value="">（リストから科目を選択）</option>
+                      {availableSubjects.map(sub => (
+                        <option key={sub} value={sub}>{sub}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={importDefaultSubject}
+                      onChange={(e) => setImportDefaultSubject(e.target.value)}
+                      placeholder="あるいは、新規科目を直接手入力..."
+                      className="w-full bg-white border border-slate-200 focus:border-indigo-650 rounded-xl px-3.5 py-2 font-bold text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-650/20"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">【2】テキスト・講義名入力（必須）</label>
-                  <input
-                    type="text"
-                    value={importDefaultTextbook}
-                    onChange={(e) => setImportDefaultTextbook(e.target.value)}
-                    placeholder="例: テキスト1, 論文・答練対策講義"
-                    className="w-full bg-white border border-slate-200 focus:border-indigo-650 rounded-xl px-3.5 py-2.5 font-bold text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-650/20"
-                  />
+                <div className="space-y-2">
+                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">【2】テキスト・講義名選択、または直接入力（必須）</label>
+                  <div className="space-y-1.5 font-bold">
+                    <select
+                      value={existingTextbooks.includes(importDefaultTextbook) ? importDefaultTextbook : ""}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setImportDefaultTextbook(e.target.value);
+                        }
+                      }}
+                      className="w-full bg-white border border-slate-200 focus:border-indigo-650 rounded-xl px-3 py-2 font-bold text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-650/20 cursor-pointer"
+                    >
+                      <option value="">（リストから既存テキストを選択）</option>
+                      {existingTextbooks.map(tb => (
+                        <option key={tb} value={tb}>{tb}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={importDefaultTextbook}
+                      onChange={(e) => setImportDefaultTextbook(e.target.value)}
+                      placeholder="あるいは、新規テキスト名を直接手入力..."
+                      className="w-full bg-white border border-slate-200 focus:border-indigo-650 rounded-xl px-3.5 py-2 font-bold text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-650/20"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -746,12 +832,18 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                   推奨目次テキスト貼り付けルール（スペースインデント）
                 </p>
                 <div className="text-[10.5px] text-indigo-850 space-y-1.5 leading-relaxed">
-                  <p>行頭の全角スペース数に基づいて、第3・第4階層をスマートに連続インジェクションします：</p>
+                  <p>行頭の全角スペース数に基づいて、章、節、問題をスマートに分類して登録します：</p>
                   <ul className="list-disc pl-4 space-y-1 text-[10px]">
-                    <li><strong className="text-slate-900">行頭スペースなし</strong>：章見出し（例: <code className="bg-indigo-150/50 px-1 rounded">第1章 資金会計基準</code>）</li>
-                    <li><strong className="text-slate-900">全角スペース1個</strong>：節または問題（例: <code className="bg-indigo-150/50 px-1 rounded">　第1節 分配可能額計算</code>）</li>
-                    <li><strong className="text-slate-900">全角スペース2個（推奨）</strong>：それ以降の具体的な問題（例: <code className="bg-indigo-150/50 px-1 rounded">　　p.1-2 問題1 社債の発行価格</code>）</li>
+                    <li><strong className="text-slate-900">全角スペース0個（0マス）</strong>：章見出し（例: <code className="bg-indigo-150/50 px-1 rounded">第1章 リース会計</code>）</li>
+                    <li><strong className="text-slate-900">全角スペース1個（1マス）</strong>：節（例: <code className="bg-indigo-150/50 px-1 rounded">　第1節 分配可能額計算</code>）※目次にある場合</li>
+                    <li><strong className="text-slate-900">問題や細目のインデント判定</strong>：
+                      <ul className="list-circle pl-4 mt-0.5 space-y-0.5 text-slate-700">
+                        <li>節がある場合：<strong className="text-slate-900">全角スペース2個（2マス）</strong>（例: <code className="bg-indigo-150/50 px-1 rounded">　　問題1 ...</code>）</li>
+                        <li>節がない場合：<strong className="text-slate-900">全角スペース1個（1マス）</strong>（例: <code className="bg-indigo-150/50 px-1 rounded">　問題1 ...</code>）</li>
+                      </ul>
+                    </li>
                   </ul>
+                  <p className="text-[9.5px] text-indigo-700 mt-1">※ タブ、半角スペース2個も、全角スペース1個分（1マス）のインデントとして判定されます。講義や教材でもスペース数で自動判定します。</p>
                 </div>
               </div>
 
