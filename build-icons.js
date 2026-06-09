@@ -2,7 +2,33 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
+// Recursive directory lister to find files
+function findFiles(dir, fileList = []) {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    if (file === 'node_modules' || file === '.git' || file === '.next' || file === 'dist') continue;
+    const name = path.join(dir, file);
+    if (fs.statSync(name).isDirectory()) {
+      findFiles(name, fileList);
+    } else {
+      fileList.push(name);
+    }
+  }
+  return fileList;
+}
+
 async function generateIcons() {
+  console.log('--- RECURSIVE FILE LISTING ---');
+  try {
+    const allFiles = findFiles('.');
+    console.log('Found files:', allFiles);
+    fs.writeFileSync('./found-files.txt', allFiles.join('\n'));
+  } catch (e) {
+    console.error('Error finding files:', e);
+    fs.writeFileSync('./found-files.txt', 'Error: ' + e.message);
+  }
+  console.log('-------------------------------');
+
   const svgPath = path.resolve('./cpax_logo.svg');
   const publicDir = path.resolve('./public');
 

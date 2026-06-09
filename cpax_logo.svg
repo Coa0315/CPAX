@@ -1,67 +1,94 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
   <defs>
-    <filter id="cpax-glow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#4f46e5" flood-opacity="0.25" />
-      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.4" />
-    </filter>
-    <filter id="x-glow" x="-15%" y="-15%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#ffffff" flood-opacity="0.3" />
+    <!-- Background Gradient for high premium depth -->
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0a0b16" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+
+    <!-- Glowing effect for the C and X elements -->
+    <filter id="c-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
 
-    <linearGradient id="gradient-c-outer" x1="50" y1="50" x2="450" y2="450" gradientUnits="userSpaceOnUse">
+    <!-- Metallic Blue-Indigo Gradient for the "C" -->
+    <linearGradient id="c-grad-outer" x1="110" y1="120" x2="270" y2="280" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#6366f1" />
-      <stop offset="45%" stop-color="#4f46e5" />
-      <stop offset="100%" stop-color="#312e81" />
-    </linearGradient>
-    
-    <linearGradient id="gradient-c-inner" x1="100" y1="100" x2="400" y2="400" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#818cf8" />
-      <stop offset="60%" stop-color="#4338ca" />
+      <stop offset="40%" stop-color="#4f46e5" />
+      <stop offset="80%" stop-color="#312e81" />
       <stop offset="100%" stop-color="#1e1b4b" />
     </linearGradient>
 
-    <linearGradient id="gradient-x-left" x1="200" y1="100" x2="450" y2="400" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="60%" stop-color="#e2e8f0" />
-      <stop offset="100%" stop-color="#cbd5e1" />
+    <linearGradient id="c-grad-inner" x1="120" y1="130" x2="250" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#818cf8" />
+      <stop offset="50%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#1e1b4b" />
     </linearGradient>
-    <linearGradient id="gradient-x-right" x1="450" y1="100" x2="200" y2="400" gradientUnits="userSpaceOnUse">
+
+    <!-- Premium Silver Chrome Gradient for the "X" -->
+    <linearGradient id="x-grad-chrome" x1="210" y1="120" x2="380" y2="280" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="50%" stop-color="#f1f5f9" />
+      <stop offset="30%" stop-color="#f1f5f9" />
+      <stop offset="70%" stop-color="#cbd5e1" />
       <stop offset="100%" stop-color="#94a3b8" />
     </linearGradient>
+
+    <!-- Shadow for overlap -->
+    <filter id="drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="-2" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
   </defs>
 
-  <rect width="100%" height="100%" fill="#000000" />
+  <!-- Complete dark solid background -->
+  <rect width="512" height="512" fill="url(#bg-grad)" rx="0" />
 
+  <!-- The "C" Crescent (Left-aligned interlocking loop) -->
   <path
-    d="M 290,105 C 190,105 105,190 105,290 C 105,390 190,475 290,475 C 350,475 400,445 425,400 L 360,360 C 345,385 320,400 290,400 C 230,400 180,350 180,290 C 180,230 230,180 290,180 C 320,180 345,195 360,220 L 425,180 C 400,135 350,105 290,105 Z"
-    fill="url(#gradient-c-outer)"
-    filter="url(#cpax-glow)"
+    d="M 264,160 A 80,80 0 1,0 264,240 L 240,226 A 52,52 0 1,1 240,174 Z"
+    fill="url(#c-grad-outer)"
+    filter="url(#c-glow)"
   />
   <path
-    d="M 290,120 C 200,120 120,200 120,290 C 120,380 200,460 290,460 C 340,460 385,435 410,395 L 375,365 C 355,385 325,400 290,400 C 230,400 180,350 180,290 C 180,230 230,180 290,180 C 325,180 355,195 375,215 L 410,185 C 385,145 340,120 290,120 Z"
-    fill="url(#gradient-c-inner)"
-    opacity="0.85"
-  />
-
-  <path
-    d="M 215,140 L 295,140 C 310,140 370,250 410,335 L 410,430 L 360,430 C 340,430 280,310 215,140 Z"
-    fill="url(#gradient-x-left)"
-    filter="url(#x-glow)"
-  />
-  
-  <path
-    d="M 215,410 L 275,410 C 295,410 370,185 410,140 L 410,140 L 435,140 C 435,140 330,310 270,410 H 215 Z"
-    fill="url(#gradient-x-right)"
-    opacity="0.95"
+    d="M 262,165 A 75,75 0 1,0 262,235 L 241,223 A 49,49 0 1,1 241,177 Z"
+    fill="url(#c-grad-inner)"
+    opacity="0.9"
   />
 
+  <!-- The "X" Chrome Loop - Overlapping Blade 1 (Top-Left to Bottom-Right) -->
+  <!-- We add drop-shadow filter to create standard depth separation -->
   <path
-    d="M 290,240 L 335,320 L 305,320 L 270,260 Z"
+    d="M 215,120 C 235,120 315,220 365,270 C 375,280 375,290 365,290 L 350,290 C 310,290 220,185 200,140 C 195,130 200,120 215,120 Z"
+    fill="url(#x-grad-chrome)"
+    filter="url(#drop-shadow)"
+  />
+
+  <!-- The "X" Chrome Loop - Overlapping Blade 2 (Bottom-Left to Top-Right) -->
+  <path
+    d="M 215,280 C 235,280 315,180 365,130 C 375,120 375,110 365,110 L 350,110 C 310,110 220,215 200,260 C 195,270 200,280 215,280 Z"
+    fill="url(#x-grad-chrome)"
+    filter="url(#drop-shadow)"
+  />
+
+  <!-- The "Interlock accent" to bind them inside visually -->
+  <path
+    d="M 252,192 L 273,212 L 253,212 Z"
     fill="#ffffff"
-    opacity="0.8"
+    opacity="0.9"
   />
 
-  <text x="50%" y="465" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="52" fill="#ffffff" text-anchor="middle" letter-spacing="12">CPAX</text>
+  <!-- Vector CPAX Brand Text below the emblem (Perfect render bypasses system font limitations) -->
+  <g fill="#ffffff" id="cpax-text-group">
+    <!-- C (Center-aligned vector drawing) -->
+    <path d="M 171,395 C 163,387 152,385 143,385 C 126.4,385 113,398.4 113,415 C 113,431.6 126.4,445 143,445 C 152,445 163,443 171,435 L 163,425 C 157,431 151,433 143,433 C 133,433 125,425 125,415 C 125,405 133,397 143,397 C 151,397 157,399 163,405 Z" />
+    
+    <!-- P -->
+    <path d="M 193,385 H 231 C 241,385 247,391 247,402 C 247,413 241,419 231,419 H 205 V 445 H 193 Z M 205,397 V 407 H 229 C 233,407 235,405 235,402 C 235,399 233,397 229,397 Z" />
+    
+    <!-- A -->
+    <path d="M 287,385 L 263,445 H 276 L 282,430 H 304 L 310,445 H 323 L 299,385 Z M 286,419 L 293,400 L 300,419 Z" />
+    
+    <!-- X -->
+    <path d="M 343,385 H 357 L 371,411 L 384,385 H 398 L 378,415 L 398,445 H 384 L 371,419 L 357,445 H 343 L 363,415 Z" />
+  </g>
 </svg>

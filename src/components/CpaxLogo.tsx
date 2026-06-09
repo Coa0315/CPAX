@@ -22,79 +22,77 @@ export const CpaxLogo: React.FC<CpaxLogoProps> = ({
     <svg
       width="100%"
       height="100%"
-      viewBox="0 0 500 500"
+      viewBox="0 0 512 512"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="select-none"
     >
       <defs>
         {/* Glow and shadow filter for high-contrast touch look */}
-        <filter id="cpax-glow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#4f46e5" floodOpacity="0.25" />
-          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#0f172a" floodOpacity="0.4" />
-        </filter>
-        <filter id="x-glow" x="-15%" y="-15%" width="130%" height="130%">
-          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#ffffff" floodOpacity="0.3" />
+        <filter id="c-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
 
-        {/* Circular C Gradients */}
-        <linearGradient id="gradient-c-outer" x1="50" y1="50" x2="450" y2="450" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#6366f1" /> {/* Indigo */}
-          <stop offset="45%" stopColor="#4f46e5" /> {/* Regular indigo */}
-          <stop offset="100%" stopColor="#312e81" /> {/* Deep dark blue/purple */}
+        {/* Metallic Blue-Indigo Gradient for the "C" */}
+        <linearGradient id="gradient-c-outer" x1="110" y1="120" x2="270" y2="280" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#6366f1" />
+          <stop offset="40%" stopColor="#4f46e5" />
+          <stop offset="80%" stopColor="#312e81" />
+          <stop offset="100%" stopColor="#1e1b4b" />
         </linearGradient>
         
-        <linearGradient id="gradient-c-inner" x1="100" y1="100" x2="400" y2="400" gradientUnits="userSpaceOnUse">
+        <linearGradient id="gradient-c-inner" x1="120" y1="130" x2="250" y2="260" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#818cf8" />
-          <stop offset="60%" stopColor="#4338ca" />
+          <stop offset="50%" stopColor="#4f46e5" />
           <stop offset="100%" stopColor="#1e1b4b" />
         </linearGradient>
 
-        {/* White Metallic X Gradients */}
-        <linearGradient id="gradient-x-left" x1="200" y1="100" x2="450" y2="400" gradientUnits="userSpaceOnUse">
+        {/* Premium Silver Chrome Gradient for the "X" */}
+        <linearGradient id="gradient-x-chrome" x1="210" y1="120" x2="380" y2="280" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="60%" stopColor="#e2e8f0" />
-          <stop offset="100%" stopColor="#cbd5e1" />
-        </linearGradient>
-        <linearGradient id="gradient-x-right" x1="450" y1="100" x2="200" y2="400" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="50%" stopColor="#f1f5f9" />
+          <stop offset="30%" stopColor="#f1f5f9" />
+          <stop offset="70%" stopColor="#cbd5e1" />
           <stop offset="100%" stopColor="#94a3b8" />
         </linearGradient>
+
+        {/* Shadow for overlap */}
+        <filter id="drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="-2" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.6" />
+        </filter>
       </defs>
 
-      {/* Styled Circle C (Left Side Crescent / Ring overlapping) */}
+      {/* The "C" Crescent (Left-aligned interlocking loop) */}
       <path
-        d="M 290,105 C 190,105 105,190 105,290 C 105,390 190,475 290,475 C 350,475 400,445 425,400 L 360,360 C 345,385 320,400 290,400 C 230,400 180,350 180,290 C 180,230 230,180 290,180 C 320,180 345,195 360,220 L 425,180 C 400,135 350,105 290,105 Z"
+        d="M 264,160 A 80,80 0 1,0 264,240 L 240,226 A 52,52 0 1,1 240,174 Z"
         fill="url(#gradient-c-outer)"
-        filter="url(#cpax-glow)"
+        filter="url(#c-glow)"
       />
       <path
-        d="M 290,120 C 200,120 120,200 120,290 C 120,380 200,460 290,460 C 340,460 385,435 410,395 L 375,365 C 355,385 325,400 290,400 C 230,400 180,350 180,290 C 180,230 230,180 290,180 C 325,180 355,195 375,215 L 410,185 C 385,145 340,120 290,120 Z"
+        d="M 262,165 A 75,75 0 1,0 262,235 L 241,223 A 49,49 0 1,1 241,177 Z"
         fill="url(#gradient-c-inner)"
-        opacity="0.85"
+        opacity="0.9"
       />
 
-      {/* Stylized Metal white X crossing (composed of 2 blade paths for the premium 3D bevel look in the image) */}
-      {/* Blade 1: Top-Left to Bottom-Right */}
+      {/* The "X" Chrome Loop - Overlapping Blade 1 (Top-Left to Bottom-Right) */}
       <path
-        d="M 215,140 L 295,140 C 310,140 370,250 410,335 L 410,430 L 360,430 C 340,430 280,310 215,140 Z"
-        fill="url(#gradient-x-left)"
-        filter="url(#x-glow)"
-      />
-      
-      {/* Blade 2: Bottom-Left to Top-Right (Interlocking bevel) */}
-      <path
-        d="M 215,410 L 275,410 C 295,410 370,185 410,140 L 410,140 L 435,140 C 435,140 330,310 270,410 H 215 Z"
-        fill="url(#gradient-x-right)"
-        opacity="0.95"
+        d="M 215,120 C 235,120 315,220 365,270 C 375,280 375,290 365,290 L 350,290 C 310,290 220,185 200,140 C 195,130 200,120 215,120 Z"
+        fill="url(#gradient-x-chrome)"
+        filter="url(#drop-shadow)"
       />
 
-      {/* Little premium overlapping joiner */}
+      {/* The "X" Chrome Loop - Overlapping Blade 2 (Bottom-Left to Top-Right) */}
       <path
-        d="M 290,240 L 335,320 L 305,320 L 270,260 Z"
+        d="M 215,280 C 235,280 315,180 365,130 C 375,120 375,110 365,110 L 350,110 C 310,110 220,215 200,260 C 195,270 200,280 215,280 Z"
+        fill="url(#gradient-x-chrome)"
+        filter="url(#drop-shadow)"
+      />
+
+      {/* The "Interlock accent" to bind them inside visually */}
+      <path
+        d="M 252,192 L 273,212 L 253,212 Z"
         fill="#ffffff"
-        opacity="0.8"
+        opacity="0.9"
       />
     </svg>
   );
