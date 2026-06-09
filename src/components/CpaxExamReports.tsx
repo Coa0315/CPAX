@@ -10,6 +10,7 @@ import { CpaxExamReport, CpaxTopic } from '../types';
 interface CpaxExamReportsProps {
   reports: CpaxExamReport[];
   topics: CpaxTopic[];
+  currentMode: 'short' | 'essay';
   onAddReport: (report: Omit<CpaxExamReport, 'reportId' | 'scheduledReviewIds'> & { linkedTopicIds?: string[]; examType?: 'short' | 'essay'; deviationValue?: number }) => void;
   onDeleteReport: (reportId: string) => void;
 }
@@ -31,11 +32,17 @@ const ESSAY_CHECKLIST_LABELS = {
 export const CpaxExamReports: React.FC<CpaxExamReportsProps> = ({
   reports,
   topics,
+  currentMode,
   onAddReport,
   onDeleteReport
 }) => {
   // Input form states
-  const [examType, setExamType] = useState<'short' | 'essay'>('short');
+  const [examType, setExamType] = useState<'short' | 'essay'>(currentMode);
+
+  // Synchronize Tab automatically whenever the active view's mode changes globally
+  React.useEffect(() => {
+    setExamType(currentMode);
+  }, [currentMode]);
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('財務会計論(計算)');
   const [score, setScore] = useState<number>(0);
@@ -191,10 +198,24 @@ export const CpaxExamReports: React.FC<CpaxExamReportsProps> = ({
       {/* LEFT FORM/LIST VIEW - 7 COLS */}
       <div className="xl:col-span-7 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6 no-print">
         <div>
-          <span className="font-mono text-[9px] bg-rose-50 border border-rose-100 text-rose-600 px-2.5 py-0.5 rounded-lg font-black tracking-widest uppercase">
-            PHASE 3: STRATEGIC REFLECTION
-          </span>
-          <h2 className="font-sans font-black text-slate-900 text-lg mt-1 tracking-tight">
+          <div className="flex items-center gap-1.5 flex-wrap mb-1.5 select-none">
+            <ClipboardCheck className="w-5 h-5 text-indigo-650 shrink-0" />
+            <span className="font-sans font-black text-[10px] text-slate-500 uppercase tracking-widest border-r border-slate-150 pr-2 leading-none">
+              自己分析カルテ
+            </span>
+            {currentMode === 'short' ? (
+              <span className="inline-flex items-center gap-1 font-mono text-[8.5px] bg-indigo-50 border border-indigo-100 text-indigo-700 font-black px-2 py-0.5 rounded-full leading-none shrink-0 shadow-sm shadow-indigo-100/50">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                短答式モード
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 font-mono text-[8.5px] bg-amber-50 border border-amber-100 text-amber-700 font-black px-2 py-0.5 rounded-full leading-none shrink-0 shadow-sm shadow-amber-100/50">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                論文式モード
+              </span>
+            )}
+          </div>
+          <h2 className="font-sans font-black text-slate-900 text-base sm:text-lg tracking-tight">
             答練・公開模試のやらかし反省カルテ
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">

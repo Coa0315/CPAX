@@ -445,7 +445,6 @@ export default function App() {
               {currentMode === 'short' ? '短答式基準 動作中' : '論文式基準 動作中'}
             </span>
           </div>
-          <span className="text-[9px] text-slate-500 font-bold block mt-1">CPAX System Build v1.0.1</span>
         </div>
       </aside>
 
@@ -513,6 +512,7 @@ export default function App() {
           <CpaxExamReports
             reports={reports}
             topics={topics}
+            currentMode={currentMode}
             onAddReport={handleAddReport}
             onDeleteReport={handleDeleteReport}
           />

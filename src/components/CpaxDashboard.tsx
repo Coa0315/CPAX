@@ -364,8 +364,8 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
           className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
-            <div className="p-2.5 bg-slate-950 text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm">
-              <BookOpen className="w-5 h-5 text-indigo-400" />
+            <div className="p-2.5 bg-indigo-50 border border-indigo-150/40 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm animate-scale-in">
+              <BookOpen className="w-5 h-5 text-indigo-600" />
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
@@ -439,15 +439,15 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
         {/* Card 3: Specific Stopwatch */}
         <div
           onClick={() => onViewSelect('timer')}
-          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
+          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-violet-350 hover:shadow-md hover:shadow-violet-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
-            <div className="p-2.5 bg-indigo-600 text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-indigo-100">
-              <Clock className="w-5 h-5 text-indigo-100" />
+            <div className="p-2.5 bg-violet-600 text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-violet-100 animate-scale-in">
+              <Clock className="w-5 h-5 text-violet-100" />
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors tracking-tight">
+                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-violet-650 transition-colors tracking-tight">
                   論点連動タイマー
                 </h3>
                 <button
@@ -456,7 +456,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     e.stopPropagation();
                     setActiveCardInfo(activeCardInfo === 'timer' ? null : 'timer');
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                  className="p-1 rounded-full text-slate-400 hover:text-violet-650 hover:bg-violet-50 transition-colors shrink-0"
                   title="説明を見る"
                 >
                   <Info className="w-3.5 h-3.5" />
@@ -469,7 +469,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               )}
             </div>
           </div>
-          <div className="text-[9px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/50 px-2.5 py-1 rounded-lg w-fit mt-3.5 font-mono">
+          <div className="text-[9px] font-bold text-violet-700 bg-violet-50 border border-violet-100/50 px-2.5 py-1 rounded-lg w-fit mt-3.5 font-mono">
             目標目安との偏差を自動演算 →
           </div>
         </div>
@@ -518,12 +518,12 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
           className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
-            <div className="p-2.5 bg-slate-900 text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-slate-900/10">
-              <Compass className="w-5 h-5 text-emerald-400" />
+            <div className="p-2.5 bg-emerald-50 border border-emerald-150/40 text-emerald-700 rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm animate-scale-in">
+              <Compass className="w-5 h-5 text-emerald-700" />
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors tracking-tight">
+                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-[#274a78] transition-colors tracking-tight">
                   志・道・進フレームワーク
                 </h3>
                 <button

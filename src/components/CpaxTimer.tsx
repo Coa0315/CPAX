@@ -200,11 +200,11 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden" id="cpax-interactive-timer">
-      <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white p-5 text-left">
+      <div className="bg-gradient-to-r from-violet-950 via-slate-900 to-violet-950 text-white p-5 text-left">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-900/50 rounded-xl border border-indigo-700/30">
-              <Clock className="w-5 h-5 text-indigo-400" />
+            <div className="p-2.5 bg-violet-900/50 rounded-xl border border-violet-700/30">
+              <Clock className="w-5 h-5 text-violet-400" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -212,14 +212,14 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowTimerHelp(!showTimerHelp)}
-                  className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-indigo-200 cursor-pointer transition-all border border-white/5 active-scale flex items-center justify-center"
+                  className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-violet-200 cursor-pointer transition-all border border-white/5 active-scale flex items-center justify-center"
                   title="計測仕様について"
                 >
-                  <Info className="w-3.5 h-3.5 text-indigo-300" />
+                  <Info className="w-3.5 h-3.5 text-violet-300" />
                 </button>
               </div>
               {showTimerHelp ? (
-                <p className="text-[10px] text-slate-300 leading-relaxed mt-1 animate-scale-in max-w-xl bg-slate-950/40 p-2 rounded-lg border border-indigo-500/20">
+                <p className="text-[10px] text-slate-300 leading-relaxed mt-1 animate-scale-in max-w-xl bg-slate-950/40 p-2 rounded-lg border border-violet-500/20">
                   バックグラウンド計測・実時刻オフセット差分検知（Date.now()）を搭載。iPadが省電力スリープや画面ロックに入っても、内部クロックと同期してズレなく正確に学習時間を測定し、論点に紐付けて履歴(cpax_history)へ格納します。
                 </p>
               ) : (
@@ -242,7 +242,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
                 value={activeTopicId}
                 onChange={(e) => setActiveTopicId(e.target.value)}
                 disabled={isRunning || secondsElapsed > 0}
-                className="w-full rounded-2xl bg-slate-50 border border-slate-100 focus:border-indigo-500 focus:bg-white px-4 py-3.5 text-xs font-bold text-slate-700 disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none transition-all mr-2 min-h-[44px]"
+                className="w-full rounded-2xl bg-slate-50 border border-slate-100 focus:border-violet-500 focus:bg-white px-4 py-3.5 text-xs font-bold text-slate-700 disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none transition-all mr-2 min-h-[44px]"
               >
                 {topics
                   .filter(t => {
@@ -262,7 +262,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
               {selectedTopicId && !(isRunning || secondsElapsed > 0) && (
                 <button
                   onClick={onClearSelectedTopic}
-                  className="w-full text-center text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer bg-white px-4 py-3 rounded-2xl border border-indigo-100 shadow-sm min-h-[44px]"
+                  className="w-full text-center text-xs font-bold text-violet-600 hover:text-violet-800 transition-colors cursor-pointer bg-white px-4 py-3 rounded-2xl border border-violet-100 shadow-sm min-h-[44px]"
                 >
                   本日予定の固定を解除
                 </button>
@@ -272,7 +272,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
           
           {/* Daily study planner schedule matching message to guide the user */}
           {schedules.some(s => s.date === todayDateStr && s.category === 'study' && s.topicId === activeTopicId) ? (
-            <span className="text-[10px] text-indigo-600 font-bold block mt-2 flex items-center gap-1">
+            <span className="text-[10px] text-violet-600 font-bold block mt-2 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" /> 今日の学習計画（TODO）への論点マッチに成功しました！
             </span>
           ) : (
@@ -327,7 +327,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
                 cx="120"
                 cy="120"
                 r="110"
-                className="stroke-indigo-600 fill-none transition-all duration-300"
+                className="stroke-violet-600 fill-none transition-all duration-300"
                 strokeWidth="6"
                 strokeDasharray="691.15"
                 strokeDashoffset={691.15 - (691.15 * targetPercentage) / 100}
@@ -340,8 +340,8 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
                 {hrsStr}:{minsStr}:{secsStr}
               </span>
               <div className="flex items-center justify-center gap-1.5 pt-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-indigo-600 animate-pulse' : 'bg-slate-300'}`} />
-                <span className={`text-[9px] font-bold tracking-widest ${isRunning ? 'text-indigo-600' : 'text-slate-400'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-violet-600 animate-pulse' : 'bg-slate-300'}`} />
+                <span className={`text-[9px] font-bold tracking-widest ${isRunning ? 'text-violet-600' : 'text-slate-400'}`}>
                   {isRunning ? 'RUNNING' : 'PAUSED'}
                 </span>
               </div>
@@ -355,7 +355,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
             </div>
             <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-600 rounded-full transition-all duration-300"
+                className="h-full bg-violet-600 rounded-full transition-all duration-300"
                 style={{ width: `${targetPercentage}%` }}
               />
             </div>
@@ -390,9 +390,9 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
             ) : (
               <button
                 onClick={startTimer}
-                className="px-8 py-3 bg-indigo-950 hover:bg-indigo-900 text-white font-bold rounded-2xl transition-all shadow-md cursor-pointer flex items-center gap-2 text-sm min-h-[50px]"
+                className="px-8 py-3 bg-violet-950 hover:bg-violet-900 text-white font-bold rounded-2xl transition-all shadow-md cursor-pointer flex items-center gap-2 text-sm min-h-[50px]"
               >
-                <Play className="w-5 h-5 fill-current text-indigo-400" />
+                <Play className="w-5 h-5 fill-current text-violet-400" />
                 集中を開始
               </button>
             )}

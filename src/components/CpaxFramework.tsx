@@ -23,7 +23,8 @@ import {
   Dumbbell,
   ShieldAlert,
   Clock,
-  LayoutGrid
+  LayoutGrid,
+  Info
 } from 'lucide-react';
 import { CpaxTopic, CpaxHistoryItem, CpaxExamReport, CpaxStudyMode } from '../types';
 
@@ -193,6 +194,7 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
   // Notification success
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [showDesc, setShowDesc] = useState(false);
 
   // -------------------------------------------------------------
   // MUTATION PERSIST LOGIC
@@ -634,19 +636,32 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-slate-500/5 rounded-full blur-2xl -ml-12 -mb-12 pointer-events-none" />
 
-        <div className="space-y-2 relative z-10">
+        <div className="space-y-3 relative z-10">
           <div className="flex items-center gap-2 flex-wrap">
             <Compass className="w-5 h-5 text-indigo-400 animate-spin-slow shrink-0" />
             <span className="font-mono text-[9px] bg-indigo-900/40 border border-indigo-800 text-indigo-300 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              CPA METHOD COCKPIT V2
+              CPA METHOD FRAMEWORK
             </span>
           </div>
-          <h2 className="font-sans font-black text-2xl md:text-3xl tracking-tight leading-none">
-            CPAX 戦略・精神 総合支配（志・道・進）
-          </h2>
-          <p className="text-xs text-indigo-200/80 max-w-2xl leading-relaxed">
-            志（譲れない動機）を一本の軸（Axis）にマッピングし、道（戦略タスク）をスケジューラーに流し込み、進（PDCA検証）で成長を科学的に把握する、究極の一元管理システム。
-          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="font-sans font-black text-2xl md:text-3xl tracking-tight leading-none">
+              CPAX メンタル サポート
+            </h2>
+            <button
+              type="button"
+              onClick={() => setShowDesc(!showDesc)}
+              className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 select-none text-white/90 cursor-pointer transition-all border border-white/10 text-[10px] font-bold flex items-center gap-1 active:scale-95"
+              title="システム説明の表示切り替え"
+            >
+              <Info className="w-3 h-3 text-indigo-300 shrink-0" />
+              <span>{showDesc ? '説明を隠す' : '説明を表示'}</span>
+            </button>
+          </div>
+          {showDesc && (
+            <p className="text-xs text-indigo-200/90 max-w-2xl leading-relaxed bg-slate-950/40 p-3.5 rounded-2xl border border-white/5 animate-scale-in">
+              志（譲れない動機）を一本の軸（Axis）にマッピングし、道（戦略タスク）をスケジューラーに流し込み、進（PDCA検証）で成長を科学的に把握する、究極の一元管理システム。
+            </p>
+          )}
         </div>
 
         {/* Global Study Mode Toggle & Synchronization Area */}
@@ -707,7 +722,7 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
           }`}
         >
           <Footprints className={`w-4.5 h-4.5 ${activeTab === 'michi' ? 'text-indigo-600' : 'text-slate-400'}`} />
-          【道 - MICHI】科目別戦略 ＆ カレンダーTODO
+          【道 - MICHI】科目別戦略 ＆ 里程標TODO
         </button>
         <button
           onClick={() => setActiveTab('shin')}
@@ -752,7 +767,7 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
                     type="date"
                     value={shortExamDate}
                     onChange={(e) => setShortExamDate(e.target.value)}
-                    className="w-full bg-white border border-slate-200 text-xs font-bold rounded-xl p-2.5 mt-1 focus:outline-none focus:border-indigo-650"
+                    className="w-full max-w-[180px] bg-white border border-slate-200 text-xs font-bold rounded-lg py-1 px-2.5 h-9 mt-1 focus:outline-none focus:border-indigo-650 transition-all cursor-pointer"
                   />
                   <div className="flex gap-1.5 pt-1.5">
                     <button
@@ -782,7 +797,7 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
                     type="date"
                     value={essayExamDate}
                     onChange={(e) => setEssayExamDate(e.target.value)}
-                    className="w-full bg-white border border-slate-200 text-xs font-bold rounded-xl p-2.5 mt-1 focus:outline-none focus:border-indigo-650"
+                    className="w-full max-w-[180px] bg-white border border-slate-200 text-xs font-bold rounded-lg py-1 px-2.5 h-9 mt-1 focus:outline-none focus:border-indigo-650 transition-all cursor-pointer"
                   />
                   <div className="flex gap-1.5 pt-1.5">
                     <button
@@ -1066,12 +1081,12 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-indigo-650" />
                 <h3 className="font-sans font-bold text-slate-900 text-sm">
-                  Q2: 科目別アクションテーマ ＆ カレンダーTODO自動インジェクション
+                  Q2: 科目別アクションテーマ ＆ 里程標（最優先TODO）設定
                 </h3>
               </div>
               <p className="text-[11px] text-slate-400 leading-normal">
                 各科目ごとの『学習指導テーマ』とタスクを決めます。
-                ここで<span className="font-extrabold text-indigo-600">「優先順位：高」</span>にしたタスクは、<span className="font-extrabold text-indigo-600 font-black">【カレンダー/予定表】を開いた際に “今期の最優先TODO” として自動で流し込まれ</span>、ワンタップでカレンダー予定に日付マッピングできます！
+                ここで<span className="font-extrabold text-indigo-600">「優先順位：高」</span>にした戦略タスクは、<span className="font-extrabold text-indigo-600 font-black">【学習計画】コックピットに “今期の最優先TODO” として自動で同期</span>され、ワンタップでカレンダー予定に日付マッピングできます！
               </p>
 
               {/* Subject key switcher. Auto masks tax_law and business_concept during 'short' mode */}
@@ -1191,7 +1206,7 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
 
                   {(subjectsConfig[activeSubjectKey]?.tasks || []).length === 0 ? (
                     <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl bg-white text-slate-400 text-[10px] font-bold select-none">
-                      登録されているタスクがありません。上のフォームから登録すると、カレンダーのカ Cockpit と同期します。
+                      登録されているタスクがありません。上のフォームから登録すると、学習計画・里程標 Cockpit と同期します。
                     </div>
                   ) : (
                     <div className="space-y-2 max-h-56 overflow-y-auto">
@@ -1206,7 +1221,7 @@ export const CpaxFrameworkComponent: React.FC<CpaxFrameworkProps> = ({
                                     ? 'bg-amber-100 text-amber-800 border border-amber-200'
                                     : 'bg-slate-100 text-slate-700'
                               }`}>
-                                {task.priority === 'high' ? '🔥高優先(カレンダー連携)' : task.priority === 'medium' ? '中' : '低'}
+                                {task.priority === 'high' ? '🔥高優先(学習計画連携)' : task.priority === 'medium' ? '中' : '低'}
                               </span>
                               <span className="text-[9px] font-mono font-black text-slate-400">
                                 目標: {task.hours}時間
