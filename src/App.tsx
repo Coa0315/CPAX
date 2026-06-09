@@ -324,11 +324,11 @@ export default function App() {
         <div className="p-5 space-y-6">
           {/* Logo Brand Zone */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-sans font-black tracking-tighter text-xl shadow-lg shadow-indigo-900/30">
-              X
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-950/40">
+              <Compass className="w-5.5 h-5.5 text-white" />
             </div>
             <div>
-              <span className="font-sans font-black tracking-tight text-lg text-white block">CPAX <span className="text-indigo-400">Axis</span></span>
+              <span className="font-sans font-black tracking-tight text-lg text-white block">CPAX</span>
               <p className="text-[9px] font-bold text-slate-400 tracking-wider">For CPA Excellence</p>
             </div>
           </div>

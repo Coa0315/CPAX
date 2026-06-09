@@ -97,9 +97,12 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               <span className="font-semibold tracking-tight">iPad OS / Pro Touch Optimized</span>
             </div>
           </div>
-          <h1 className="font-outfit font-black text-3xl sm:text-4xl tracking-tighter leading-none text-white uppercase">
-            CPAX <span className="font-light text-indigo-400">Axis</span>
-          </h1>
+          <div className="flex items-center gap-2.5">
+            <Compass className="w-8 h-8 text-indigo-400 shrink-0" />
+            <h1 className="font-sans font-black text-3xl sm:text-4xl tracking-tight leading-none text-white">
+              CPAX
+            </h1>
+          </div>
           <p className="text-xs text-slate-300 font-medium max-w-xl leading-relaxed">
             ようこそ、合格への絶対軸へ。すべての学習データ、タイマー記録、そして答練でのやらかし反省レポートが、一本の論点目次串（cpaxTopicId）でスマートに連動する、受験生専用の意志決定型コンソールです。
           </p>
