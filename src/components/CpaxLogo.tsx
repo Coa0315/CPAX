@@ -34,18 +34,18 @@ export const CpaxLogo: React.FC<CpaxLogoProps> = ({
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
 
-        {/* Metallic Blue-Indigo Gradient for the "C" */}
+        {/* CPAX Brand Blue (#274a78) Metallic Gradient */}
         <linearGradient id="gradient-c-outer" x1="110" y1="120" x2="270" y2="280" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="40%" stopColor="#4f46e5" />
-          <stop offset="80%" stopColor="#312e81" />
-          <stop offset="100%" stopColor="#1e1b4b" />
+          <stop offset="0%" stopColor="#4e7ebc" />
+          <stop offset="40%" stopColor="#274a78" />
+          <stop offset="85%" stopColor="#142a4a" />
+          <stop offset="100%" stopColor="#081324" />
         </linearGradient>
         
         <linearGradient id="gradient-c-inner" x1="120" y1="130" x2="250" y2="260" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#818cf8" />
-          <stop offset="50%" stopColor="#4f46e5" />
-          <stop offset="100%" stopColor="#1e1b4b" />
+          <stop offset="0%" stopColor="#729ed2" />
+          <stop offset="50%" stopColor="#274a78" />
+          <stop offset="100%" stopColor="#081324" />
         </linearGradient>
 
         {/* Premium Silver Chrome Gradient for the "X" */}
