@@ -96,9 +96,6 @@ export const CpaxLogo: React.FC<CpaxLogoProps> = ({
         strokeLinecap="round"
         opacity="0.9"
       />
-
-      {/* Pure aesthetic target center dot representing Focus and Axis path */}
-      <circle cx="210" cy="256" r="6" fill="#f8fafc" opacity="0.9" />
     </svg>
   );
 
