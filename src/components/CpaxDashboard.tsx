@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { BookOpen, Calendar, Clock, ClipboardCheck, Sparkles, AlertCircle, Compass, Smile, HelpCircle, Frown, CheckSquare, ShieldAlert, Award, Database, Meh, Info } from 'lucide-react';
+import { BookOpen, Calendar, Clock, ClipboardCheck, Sparkles, AlertCircle, Compass, Smile, HelpCircle, Frown, CheckSquare, ShieldAlert, Award, Database, Meh, Info, Settings, Plus, Trash2, X, ChevronDown, Check } from 'lucide-react';
 import { CpaxTopic, CpaxHistoryItem, CpaxSchedule, CpaxExamReport, CpaxFramework, CpaxStudyMode, CpaxCondition } from '../types';
 import { CpaxLogo } from './CpaxLogo';
 
@@ -41,6 +41,95 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
   const [showHeroInfo, setShowHeroInfo] = useState(false);
   const [showConditionInfo, setShowConditionInfo] = useState(false);
   const [activeCardInfo, setActiveCardInfo] = useState<string | null>(null);
+
+  // Short term target management states
+  interface CpaxShortTermTarget {
+    id: string;
+    title: string;
+    date: string;
+  }
+
+  const [shortTermTargets, setShortTermTargets] = useState<CpaxShortTermTarget[]>(() => {
+    try {
+      const cached = localStorage.getItem('cpax_short_term_targets');
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      { id: 'st-1', title: '第1回 短答直前答練', date: '2026-07-20' },
+      { id: 'st-2', title: '全統公開模試', date: '2026-10-15' },
+      { id: 'st-3', title: '財務会計論 1周完了目標', date: '2026-06-30' }
+    ];
+  });
+
+  const [activeShortTermId, setActiveShortTermId] = useState<string>(() => {
+    try {
+      const cached = localStorage.getItem('cpax_active_short_term_target_id');
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {}
+    return 'st-1';
+  });
+
+  const [showShortTermModal, setShowShortTermModal] = useState(false);
+  const [newSTTitle, setNewSTTitle] = useState('');
+  const [newSTDate, setNewSTDate] = useState('');
+
+  const activeSTTarget = useMemo(() => {
+    return shortTermTargets.find(t => t.id === activeShortTermId) || shortTermTargets[0];
+  }, [shortTermTargets, activeShortTermId]);
+
+  const stDaysRemaining = useMemo(() => {
+    if (!activeSTTarget) return 0;
+    const target = new Date(activeSTTarget.date);
+    const today = new Date();
+    target.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const diffTime = target.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }, [activeSTTarget]);
+
+  // Handle management actions
+  const handleAddSTTarget = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSTTitle.trim() || !newSTDate) return;
+    const newTarget: CpaxShortTermTarget = {
+      id: `st-${Date.now()}`,
+      title: newSTTitle.trim(),
+      date: newSTDate
+    };
+    const updated = [...shortTermTargets, newTarget];
+    setShortTermTargets(updated);
+    localStorage.setItem('cpax_short_term_targets', JSON.stringify(updated));
+    setActiveShortTermId(newTarget.id);
+    localStorage.setItem('cpax_active_short_term_target_id', JSON.stringify(newTarget.id));
+    setNewSTTitle('');
+    setNewSTDate('');
+  };
+
+  const handleDeleteSTTarget = (id: string) => {
+    if (shortTermTargets.length <= 1) {
+      alert('少なくとも1つのカウントダウン目標を残す必要があります。');
+      return;
+    }
+    const updated = shortTermTargets.filter(t => t.id !== id);
+    setShortTermTargets(updated);
+    localStorage.setItem('cpax_short_term_targets', JSON.stringify(updated));
+    if (activeShortTermId === id) {
+      const nextId = updated[0].id;
+      setActiveShortTermId(nextId);
+      localStorage.setItem('cpax_active_short_term_target_id', JSON.stringify(nextId));
+    }
+  };
+
+  const handleSelectSTTarget = (id: string) => {
+    setActiveShortTermId(id);
+    localStorage.setItem('cpax_active_short_term_target_id', JSON.stringify(id));
+  };
 
   // 1. Dynamic Metric: Today's study minutes
   const todayMinutes = useMemo(() => {
@@ -219,33 +308,47 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
           </div>
 
           {(() => {
-            const isNearing = daysRemaining > 0 && daysRemaining <= 30;
-            const isOver = daysRemaining < 0;
+            const isNearing = stDaysRemaining > 0 && stDaysRemaining <= 30;
+            const isOver = stDaysRemaining < 0;
             const colorClass = isOver 
               ? 'from-slate-100/60 to-slate-50/40 text-slate-400 border-slate-200' 
               : isNearing
                 ? 'from-rose-50/70 via-rose-50/10 to-white text-rose-600 border-rose-200 animate-pulse bg-rose-50/30'
-                : 'from-indigo-50/40 to-white text-indigo-600 border-indigo-100/50';
+                : 'from-amber-50/35 to-white text-amber-750 border-amber-100/60';
             
             const textNumClass = isOver
               ? 'text-slate-400'
               : isNearing
                 ? 'text-rose-600'
-                : 'text-indigo-950';
+                : 'text-slate-800';
 
             return (
               <div className={`border rounded-2xl p-4 shadow-sm text-left bg-gradient-to-br relative overflow-hidden transition-all duration-300 ${colorClass}`}>
-                <span className={`block text-[8px] font-bold uppercase tracking-widest leading-none ${isNearing ? 'text-rose-700' : 'text-indigo-600'}`}>
-                  DECISIVE COUNTDOWN
-                </span>
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <span className={`block text-[8px] font-bold uppercase tracking-widest leading-none ${isNearing ? 'text-rose-700' : 'text-indigo-600'}`}>
+                    SHORT-TERM TARGET
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowShortTermModal(true);
+                    }}
+                    className="p-1 px-1.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold transition-all hover:scale-105 active-scale cursor-pointer flex items-center gap-0.5 text-[8.5px] border border-indigo-150/40 shrink-0"
+                    title="短期目標の管理・選択"
+                  >
+                    <Settings className="w-2.5 h-2.5 text-indigo-600" />
+                    <span>目標選択</span>
+                  </button>
+                </div>
                 <div className="flex items-baseline gap-1 mt-1.5 leading-none">
                   <span className={`font-sans font-bold text-2xl sm:text-3xl tracking-tight ${textNumClass}`}>
-                    {isOver ? 0 : daysRemaining}
+                    {isOver ? 0 : stDaysRemaining}
                   </span>
                   <span className="text-[10px] font-bold opacity-80">日</span>
                 </div>
-                <span className={`text-[9px] font-bold block mt-1 leading-none font-sans truncate ${isNearing ? 'text-rose-500' : 'text-indigo-500'}`}>
-                  {targetTitle || '本試験'}までの逆算
+                <span className={`text-[9.5px] font-bold block mt-1.5 leading-none font-sans truncate ${isNearing ? 'text-rose-500' : 'text-slate-500'}`} title={activeSTTarget?.title}>
+                  {activeSTTarget ? activeSTTarget.title : '短期目標'}への逆算
                 </span>
               </div>
             );
@@ -533,6 +636,146 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* 6. Short-term Countdowns Config Modal */}
+      {showShortTermModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in no-print">
+          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100/80 p-5 space-y-4 animate-scale-in text-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-sans font-black text-sm text-slate-900">
+                  短期目標カウントダウン管理
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowShortTermModal(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* List and Choose Active Target */}
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">
+                ① 表示する目標を1つ選択
+              </label>
+              <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
+                {shortTermTargets.map(t => {
+                  const targetDate = new Date(t.date);
+                  const today = new Date();
+                  targetDate.setHours(0,0,0,0);
+                  today.setHours(0,0,0,0);
+                  const daysLeft = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  const isSelected = t.id === activeShortTermId;
+
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => handleSelectSTTarget(t.id)}
+                      className={`p-2.5 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        isSelected
+                          ? 'bg-indigo-50/50 border-indigo-600 text-indigo-950 font-bold'
+                          : 'bg-white border-slate-100 text-slate-700 hover:border-slate-200'
+                      }`}
+                    >
+                      <div className="space-y-1 overflow-hidden">
+                        <div className="flex items-center gap-1.5">
+                          {isSelected ? (
+                            <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse shrink-0" />
+                          ) : (
+                            <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
+                          )}
+                          <p className="text-xs font-bold truncate">{t.title}</p>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400 block">
+                          目標日: {t.date}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <span className={`text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                          daysLeft < 0
+                            ? 'bg-slate-100 text-slate-400'
+                            : daysLeft <= 15
+                              ? 'bg-rose-100 text-rose-700'
+                              : 'bg-indigo-100 text-indigo-700'
+                        }`}>
+                          {daysLeft < 0 ? '終了' : `あと ${daysLeft}日`}
+                        </span>
+                        
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSTTarget(t.id);
+                          }}
+                          className="p-1.5 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
+                          title="削除"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Form to Add New Target */}
+            <form onSubmit={handleAddSTTarget} className="border-t border-slate-100 pt-3 space-y-2.5">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">
+                ② 新しい短期目標を追加する
+              </label>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-400 mb-0.5">目標名・答練名</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="例: 第1回 論文答練"
+                    value={newSTTitle}
+                    onChange={(e) => setNewSTTitle(e.target.value)}
+                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-indigo-500 rounded-lg p-1.5 text-xs font-bold focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-400 mb-0.5">目標日付</label>
+                  <input
+                    type="date"
+                    required
+                    value={newSTDate}
+                    onChange={(e) => setNewSTDate(e.target.value)}
+                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-indigo-500 rounded-lg p-1.5 text-xs font-mono font-bold focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-indigo-950 hover:bg-slate-900 text-white p-2.5 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all shadow-md active-scale cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-indigo-300" />
+                <span>短期目標を追加 & 選択</span>
+              </button>
+            </form>
+
+            <div className="flex justify-end pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowShortTermModal(false)}
+                className="px-4 py-2 hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-600 font-bold text-xs cursor-pointer min-h-[36px] transition-colors"
+              >
+                完了して閉じる
+              </button>
+            </div>
           </div>
         </div>
       )}
