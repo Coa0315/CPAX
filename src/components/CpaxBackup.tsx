@@ -110,6 +110,39 @@ export const CpaxBackup: React.FC<CpaxBackupProps> = ({ onDataRefresh }) => {
     }
   };
 
+  const handleCompleteWipe = () => {
+    if (window.confirm('【重要】警告: 初期設定されているすべての科目・目次リスト（財務、管理等）を含め、アプリ内のすべてのデータを完全にゼロ（白紙状態）にします。この操作は取り消せません。本当によろしいですか？')) {
+      localStorage.clear();
+      
+      // Seed with strictly blank collections to ensure they don't auto-repopulate with defaults on next mount
+      localStorage.setItem('cpax_study_mode', JSON.stringify('short'));
+      localStorage.setItem('cpax_master_contents', JSON.stringify([]));
+      localStorage.setItem('cpax_history', JSON.stringify([]));
+      localStorage.setItem('cpax_schedules', JSON.stringify([]));
+      localStorage.setItem('cpax_exam_reports', JSON.stringify([]));
+      localStorage.setItem('cpax_subject_order', JSON.stringify([]));
+      localStorage.setItem('cpax_target_date', JSON.stringify('2026-12-13'));
+      localStorage.setItem('cpax_target_title', JSON.stringify(''));
+      
+      const freshFramework = {
+        soulMotivation: '',
+        absolutePromise: '',
+        milestones: {
+          targetExamDate: '2026-12-13',
+          targetExamTitle: '',
+          targetDailyStudyHours: 8,
+          milestone6Months: '',
+          milestone3Months: ''
+        },
+        priorityFocusList: []
+      };
+      localStorage.setItem('cpax_framework', JSON.stringify(freshFramework));
+
+      setStatusMessage({ text: '初期論点目次も含め、すべてのアプリ内データを完全に消去し、真っ白な白紙状態（完全ゼロ）にリセットしました！', isError: false });
+      onDataRefresh();
+    }
+  };
+
   const handleInjectMockData = () => {
     try {
       const sampleHistory = [
@@ -245,50 +278,50 @@ export const CpaxBackup: React.FC<CpaxBackupProps> = ({ onDataRefresh }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden" id="cpax-backup-panel">
-      <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-black p-6 text-white flex items-center justify-between border-b border-indigo-950/40">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden text-left" id="cpax-backup-panel">
+      <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-black p-4 text-white flex items-center justify-between border-b border-indigo-950/40">
         <div className="flex items-center gap-3">
-          <Database className="w-6 h-6 text-indigo-400" />
+          <Database className="w-5 h-5 text-indigo-400" />
           <div className="text-left">
-            <h2 className="font-sans font-black text-lg tracking-tight">バックアップ ＆ データ管理</h2>
-            <p className="text-[11px] text-indigo-200">iPad / PCローカル完結の信頼に足る絶対データセキュリティ</p>
+            <h2 className="font-sans font-black text-sm sm:text-base tracking-tight leading-none">バックアップ ＆ データ管理</h2>
+            <p className="text-[10px] text-indigo-200 mt-1 font-bold">iPad / PCローカル完結の信頼に足る絶対データセキュリティ</p>
           </div>
         </div>
       </div>
 
-      <div className="p-6.5 space-y-6">
+      <div className="p-4 sm:p-5 space-y-4">
         {statusMessage && (
-          <div className={`p-4 rounded-xl flex items-start gap-3 ${statusMessage.isError ? 'bg-rose-50 text-rose-800 border border-rose-100' : 'bg-emerald-50 text-emerald-800 border border-emerald-100'}`}>
-            {statusMessage.isError ? <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-600" /> : <CheckCircle className="w-5 h-5 shrink-0 mt-0.5 text-emerald-600" />}
-            <span className="text-sm font-semibold">{statusMessage.text}</span>
+          <div className={`p-3 rounded-xl flex items-start gap-2.5 ${statusMessage.isError ? 'bg-rose-50 text-rose-800 border border-rose-100' : 'bg-emerald-50 text-emerald-800 border border-emerald-100'}`}>
+            {statusMessage.isError ? <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-rose-600" /> : <CheckCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-emerald-600" />}
+            <span className="text-xs font-semibold">{statusMessage.text}</span>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {/* Export card */}
-          <div className="border border-slate-100 rounded-2xl p-5 hover:border-slate-300 transition-colors bg-slate-50/50 flex flex-col justify-between">
+          <div className="border border-slate-100 rounded-xl p-4 hover:border-slate-300 transition-colors bg-slate-50/50 flex flex-col justify-between">
             <div>
-              <span className="text-indigo-600 font-extrabold text-[9px] uppercase tracking-wider block mb-1">LOCAL EXPORT</span>
-              <h3 className="font-bold text-slate-900 text-sm mb-2 font-sans tracking-tight">JSONバックアップの保存</h3>
-              <p className="text-xs text-slate-500 mb-4 leading-relaxed font-semibold">
+              <span className="text-indigo-600 font-extrabold text-[8.5px] uppercase tracking-wider block mb-1">LOCAL EXPORT</span>
+              <h3 className="font-bold text-slate-900 text-xs sm:text-sm mb-1.5 font-sans tracking-tight">JSONバックアップの保存</h3>
+              <p className="text-[11px] text-slate-500 mb-3 leading-relaxed font-semibold">
                 現在のすべての学習実績（タイマー履歴、計画、反省レポート、志）を単一のファイルにまとめてiPadに書き出します。端末の買い換えや、データの紛失対策に有効です。
               </p>
             </div>
             <button
               onClick={handleExport}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider rounded-xl transition-all cursor-pointer shadow active-scale"
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider rounded-lg transition-all cursor-pointer shadow-sm active-scale"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5" />
               iPadへJSONを保存する
             </button>
           </div>
 
           {/* Import card */}
-          <div className="border border-slate-100 rounded-2xl p-5 hover:border-slate-300 transition-colors bg-slate-50/50 flex flex-col justify-between">
+          <div className="border border-slate-100 rounded-xl p-4 hover:border-slate-300 transition-colors bg-slate-50/50 flex flex-col justify-between">
             <div>
-              <span className="text-blue-600 font-extrabold text-[9px] uppercase tracking-wider block mb-1">LOCAL LOAD & RESTORE</span>
-              <h3 className="font-bold text-slate-900 text-sm mb-2 font-sans tracking-tight">バックアップの復元</h3>
-              <p className="text-xs text-slate-500 mb-4 leading-relaxed font-semibold">
+              <span className="text-blue-600 font-extrabold text-[8.5px] uppercase tracking-wider block mb-1">LOCAL LOAD & RESTORE</span>
+              <h3 className="font-bold text-slate-900 text-xs sm:text-sm mb-1.5 font-sans tracking-tight">バックアップの復元</h3>
+              <p className="text-[11px] text-slate-500 mb-3 leading-relaxed font-semibold">
                 過去に保存した `.json` ファイルを読み込み、データを現在のCPAXに流し込みます。既存のデータは完全に上書きされますのでご注意ください。
               </p>
             </div>
@@ -302,44 +335,54 @@ export const CpaxBackup: React.FC<CpaxBackupProps> = ({ onDataRefresh }) => {
               />
               <label
                 htmlFor="cpax-file-import-input"
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs tracking-wider rounded-xl transition-all cursor-pointer shadow active-scale text-center"
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs tracking-wider rounded-lg transition-all cursor-pointer shadow-sm active-scale text-center block"
               >
-                <Upload className="w-4 h-4" />
-                バックアップファイルを選択して復元
+                <Upload className="w-3.5 h-3.5 inline inline-block" />
+                バックアップの復元を実行
               </label>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-5 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-3 bg-indigo-50/40 p-4 rounded-2xl border border-indigo-100 max-w-full sm:max-w-[70%]">
-            <Flame className="w-6 h-6 text-indigo-600 shrink-0" />
+        {/* Action Inject & Counter-Reversal Wipe */}
+        <div className="border-t border-slate-100 pt-4 flex flex-col md:flex-row gap-4 items-stretch justify-between">
+          <div className="flex items-start gap-2.5 bg-indigo-50/40 p-3 rounded-xl border border-indigo-100 flex-1">
+            <Flame className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
             <div className="text-left">
-              <h4 className="text-xs font-black text-indigo-900">【初心者・お試し用】臨床データの投入</h4>
-              <p className="text-[11px] text-indigo-700 leading-relaxed mt-0.5 font-semibold">
-                一から手動で実績を追加する前に、グラフやツリーの連動をチェックしたい場合はこちら。財務会計論や管理会計論の本物さながらの学習記録セットを、ワンタップで高速注入できます。
+              <h4 className="text-xs font-black text-indigo-900 leading-none">お試しデータ注入 vs 完全ゼロ白紙化</h4>
+              <p className="text-[11px] text-indigo-700 leading-normal mt-1.5 font-semibold">
+                お試し用擬似実績セット（履歴、答練復習反省シート、志フレームワークなど）を一発で注入するボタンと、その逆である<b>「最初から組み込まれている目次リストすらすべて完全に空・真っ白な白紙（ゼロクリア）」にするリセットボタン</b>の選択エリアです。本番運用に入りたい方は「完全にゼロ（白紙状態）にする」を実行してください。
               </p>
             </div>
           </div>
-          <button
-            onClick={handleInjectMockData}
-            className="w-full sm:w-auto px-5 py-3 cursor-pointer bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow active-scale text-center border border-slate-900"
-          >
-            お試しデータを注入する
-          </button>
+          
+          <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-2 shrink-0 justify-center">
+            <button
+              onClick={handleInjectMockData}
+              className="px-4 py-2.5 cursor-pointer bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px] rounded-lg shadow-sm active-scale text-center border border-slate-900 transition-all flex items-center justify-center gap-1.5"
+            >
+              🚀 お試しデータを注入する
+            </button>
+            <button
+              onClick={handleCompleteWipe}
+              className="px-4 py-2.5 cursor-pointer bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-[11px] rounded-lg shadow-sm active-scale text-center border border-rose-200 transition-all flex items-center justify-center gap-1.5"
+            >
+              🗑️ アプリのデータを完全にゼロ（白紙）にする
+            </button>
+          </div>
         </div>
 
-        <div className="border-t border-slate-100 pt-5 flex items-center justify-between">
+        <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
           <div className="text-left">
-            <h4 className="text-xs font-extrabold text-slate-700 block">データの完全消去</h4>
-            <p className="text-[11px] text-slate-400 font-semibold">LocalStorageのすべての領域をクリアしてアカウントを完全に初期状態に戻します。</p>
+            <h4 className="text-xs font-extrabold text-slate-700 leading-none">データの部分初期化</h4>
+            <p className="text-[10px] text-slate-400 font-semibold mt-1">学習データ、タイマー履歴等の入力情報のみをリセットし、デフォルトの論点目次アコーディオンは保持した状態に戻します。</p>
           </div>
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 text-xs font-extrabold text-rose-600 hover:text-rose-800 transition-colors py-2 px-3.5 hover:bg-rose-50 rounded-xl cursor-pointer active-scale"
+            className="flex items-center gap-1 text-xs font-extrabold text-amber-600 hover:text-amber-800 transition-colors py-1.5 px-3 hover:bg-amber-50 rounded-lg cursor-pointer active-scale shrink-0"
           >
-            <Trash2 className="w-4 h-4" />
-            データを初期化する
+            <Trash2 className="w-3.5 h-3.5" />
+            入力データのみ初期化
           </button>
         </div>
       </div>
