@@ -188,6 +188,15 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
   // Time difference relative to set goals (± delta)
   const timeDifferenceDiff = currentMinutesCount - targetMinutes;
 
+  const timerHrs = Math.floor(secondsElapsed / 3600);
+  const timerMins = Math.floor((secondsElapsed % 3600) / 60);
+  const timerSecs = secondsElapsed % 60;
+  
+  const padStr = (n: number) => n.toString().padStart(2, '0');
+  const hrsStr = padStr(timerHrs);
+  const minsStr = padStr(timerMins);
+  const secsStr = padStr(timerSecs);
+
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden" id="cpax-interactive-timer">
       <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 text-white p-6 p-y-8 text-left">
@@ -257,7 +266,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
         {/* Goal Indicator adjust panel */}
         <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="text-left space-y-0.5">
-            <span className="text-[8px] font-extrabold tracking-widest text-slate-400 block uppercase">GOAL INTERVAL</span>
+            <span className="text-[8px] font-extrabold tracking-widest text-slate-400 block uppercase font-sans">GOAL INTERVAL</span>
             <h4 className="text-xs font-black text-slate-800">問題目安（目標時間）の設定</h4>
             <p className="text-[10px] text-slate-400 font-semibold">当日のカレンダー目標、または論点仕様から自動反映されます</p>
           </div>
@@ -270,7 +279,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
               <Minus className="w-4 h-4" />
             </button>
             <div className="text-center min-w-[80px]">
-              <span className="font-mono text-xl font-black text-slate-900">{targetMinutes}</span>
+              <span className="font-sans text-xl font-bold text-slate-900 tabular-nums">{targetMinutes}</span>
               <span className="text-xs text-slate-400 font-extrabold ml-1">分</span>
             </div>
             <button
@@ -287,7 +296,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
         <div className="flex flex-col items-center justify-center py-6 space-y-5">
           <div className="relative flex items-center justify-center w-60 h-60 rounded-full border-[6px] border-slate-50 bg-slate-50/20 shadow-inner">
             {/* Elegant Circular progress visual tracker bar */}
-            <svg className="absolute inset-0 w-full h-full -rotate-90">
+            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 240 240">
               <circle
                 cx="120"
                 cy="120"
@@ -307,14 +316,14 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
               />
             </svg>
 
-            <div className="text-center z-10 space-y-1">
-              <span className="font-mono text-3xl sm:text-4xl font-black tracking-tight text-slate-900 block select-all">
-                {formatTime(secondsElapsed)}
+            <div className="text-center z-10 flex flex-col items-center justify-center">
+              <span className="text-3xl sm:text-4xl font-sans font-bold tracking-wide text-slate-850 tabular-nums">
+                {hrsStr}:{minsStr}:{secsStr}
               </span>
-              <div className="flex items-center justify-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-indigo-600 animate-pulse' : 'bg-slate-300'}`} />
-                <span className={`text-[9px] font-black tracking-widest ${isRunning ? 'text-indigo-600' : 'text-slate-400'}`}>
-                  {isRunning ? 'MEASURING' : 'PAUSED'}
+              <div className="flex items-center justify-center gap-1.5 pt-2">
+                <span className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-indigo-600 animate-pulse' : 'bg-slate-300'}`} />
+                <span className={`text-[9px] font-bold tracking-widest ${isRunning ? 'text-indigo-600' : 'text-slate-400'}`}>
+                  {isRunning ? 'RUNNING' : 'PAUSED'}
                 </span>
               </div>
             </div>

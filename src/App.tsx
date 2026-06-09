@@ -148,6 +148,7 @@ export default function App() {
   const handleToggleSchedule = (scheduleId: string) => {
     let freshSavedHistoryItem: CpaxHistoryItem | null = null;
     let autoAddedToHistory = false;
+    let shouldRemoveFromHistory = false;
 
     const nextSchedules = schedules.map(s => {
       if (s.scheduleId === scheduleId) {
@@ -159,15 +160,19 @@ export default function App() {
           const minutes = s.targetMinutes || topicObj?.estimatedMinutes || 45;
           
           freshSavedHistoryItem = {
-            historyId: `hist-${Date.now()}`,
+            historyId: `hist-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
             topicId: s.topicId,
             date: s.date,
             duration: minutes,
             evaluation: 'good', // デフォルト自己評価 ◯ (good)
             type: 'manual',
-            note: 'カレンダー行動表の完了チェックによる自動実績同期。'
+            note: 'カレンダー行動表の完了チェックによる自動実績同期。',
+            scheduleId: s.scheduleId // Link schedule ID
           };
           autoAddedToHistory = true;
+        } else if (!nextCompleted && s.category === 'study' && s.topicId) {
+          // If untoggled back, flag to clean up database
+          shouldRemoveFromHistory = true;
         }
 
         return { ...s, completed: nextCompleted };
@@ -182,6 +187,10 @@ export default function App() {
       const nextHistory = [...history, freshSavedHistoryItem];
       setHistory(nextHistory);
       localStorage.setItem('cpax_history', JSON.stringify(nextHistory));
+    } else if (shouldRemoveFromHistory) {
+      const nextHistory = history.filter(h => h.scheduleId !== scheduleId);
+      setHistory(nextHistory);
+      localStorage.setItem('cpax_history', JSON.stringify(nextHistory));
     }
   };
 
@@ -190,6 +199,11 @@ export default function App() {
     const nextSchedules = schedules.filter(s => s.scheduleId !== scheduleId);
     setSchedules(nextSchedules);
     localStorage.setItem('cpax_schedules', JSON.stringify(nextSchedules));
+
+    // Cleanup study validation logs tied to this deleted plan
+    const nextHistory = history.filter(h => h.scheduleId !== scheduleId);
+    setHistory(nextHistory);
+    localStorage.setItem('cpax_history', JSON.stringify(nextHistory));
   };
 
   // Add reflection exam report (答練・模試のやらかしシート、3日後自動強制カレンダー召喚 & 目次履歴流し込み)

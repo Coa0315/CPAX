@@ -175,18 +175,18 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
         {/* Dynamic primary dashboard counters */}
         <div className="md:col-span-7 grid grid-cols-3 gap-3">
           <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm text-left relative overflow-hidden">
-            <span className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">TODAY学习</span>
+            <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">TODAY学習</span>
             <div className="flex items-baseline gap-1 mt-1.5">
-              <span className="font-outfit font-black text-2xl sm:text-3xl text-indigo-950 tracking-tight">{todayHours}</span>
-              <span className="text-[10px] font-bold text-slate-400">min</span>
+              <span className="font-sans font-bold text-2xl sm:text-3xl text-slate-800 tracking-tight">{todayHours}</span>
+              <span className="text-[10px] font-bold text-slate-400">h</span>
             </div>
             <span className="text-[9px] font-bold text-slate-400 block mt-1 leading-none">手動 ✕ タイマー実績合計</span>
           </div>
 
           <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm text-left relative overflow-hidden">
-            <span className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">ROTATE CO-EFFICIENT</span>
+            <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">ROTATE CO-EFFICIENT</span>
             <div className="flex items-baseline gap-1 mt-1.5">
-              <span className="font-outfit font-black text-2xl sm:text-3xl text-indigo-950 tracking-tight">{totalRotations}</span>
+              <span className="font-sans font-bold text-2xl sm:text-3xl text-slate-800 tracking-tight">{totalRotations}</span>
               <span className="text-[10px] font-bold text-slate-400">回</span>
             </div>
             <span className="text-[9px] font-bold text-slate-400 block mt-1 leading-none">全講義論点 累計周回数</span>
@@ -204,16 +204,16 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
             const textNumClass = isOver
               ? 'text-slate-400'
               : isNearing
-                ? 'text-rose-600 font-black'
+                ? 'text-rose-600'
                 : 'text-indigo-950';
 
             return (
               <div className={`border rounded-2xl p-4 shadow-sm text-left bg-gradient-to-br relative overflow-hidden transition-all duration-300 ${colorClass}`}>
-                <span className={`block text-[8px] font-extrabold uppercase tracking-widest leading-none ${isNearing ? 'text-rose-700 font-extrabold' : 'text-indigo-600'}`}>
+                <span className={`block text-[8px] font-bold uppercase tracking-widest leading-none ${isNearing ? 'text-rose-700' : 'text-indigo-600'}`}>
                   DECISIVE COUNTDOWN
                 </span>
                 <div className="flex items-baseline gap-1 mt-1.5 leading-none">
-                  <span className={`font-outfit font-black text-2xl sm:text-3xl tracking-tight ${textNumClass}`}>
+                  <span className={`font-sans font-bold text-2xl sm:text-3xl tracking-tight ${textNumClass}`}>
                     {isOver ? 0 : daysRemaining}
                   </span>
                   <span className="text-[10px] font-bold opacity-80">日</span>
