@@ -361,16 +361,16 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
         {/* Card 1: Syllabus Master */}
         <div
           onClick={() => onViewSelect('content_tree')}
-          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
+          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-[#274a78]/40 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
-            <div className="p-2.5 bg-indigo-50 border border-indigo-150/40 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm animate-scale-in">
-              <BookOpen className="w-5 h-5 text-indigo-600" />
+            <div className="p-2.5 bg-[#274a78] text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-[#274a78]/20 animate-scale-in">
+              <BookOpen className="w-5 h-5 text-[#dce7f5]" />
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors tracking-tight">
-                  目次マスター（科目論点）
+                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-[#274a78] transition-colors tracking-tight">
+                  目次管理
                 </h3>
                 <button
                   type="button"
@@ -378,7 +378,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     e.stopPropagation();
                     setActiveCardInfo(activeCardInfo === 'content_tree' ? null : 'content_tree');
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                  className="p-1 rounded-full text-slate-400 hover:text-[#274a78] hover:bg-[#274a78]/10 transition-colors shrink-0"
                   title="説明を見る"
                 >
                   <Info className="w-3.5 h-3.5" />
@@ -391,7 +391,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               )}
             </div>
           </div>
-          <div className="text-[9px] font-bold text-slate-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg w-fit mt-3.5 font-mono">
+          <div className="text-[9px] font-bold text-[#274a78] bg-[#274a78]/5 border border-[#274a78]/15 px-2.5 py-1 rounded-lg w-fit mt-3.5 font-mono">
             回転中: ◯({evaluationCounts.good}) / △({evaluationCounts.average}) / ✕({evaluationCounts.poor})
           </div>
         </div>
@@ -407,7 +407,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors tracking-tight">
+                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-emerald-700 transition-colors tracking-tight">
                   学習計画とカレンダー
                 </h3>
                 <button
@@ -416,7 +416,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     e.stopPropagation();
                     setActiveCardInfo(activeCardInfo === 'calendar' ? null : 'calendar');
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                  className="p-1 rounded-full text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors shrink-0"
                   title="説明を見る"
                 >
                   <Info className="w-3.5 h-3.5" />
@@ -439,7 +439,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
         {/* Card 3: Specific Stopwatch */}
         <div
           onClick={() => onViewSelect('timer')}
-          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-violet-350 hover:shadow-md hover:shadow-violet-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
+          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-violet-300 hover:shadow-md hover:shadow-violet-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
             <div className="p-2.5 bg-violet-600 text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-violet-100 animate-scale-in">
@@ -448,7 +448,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
                 <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-violet-650 transition-colors tracking-tight">
-                  論点連動タイマー
+                  勉強タイマー
                 </h3>
                 <button
                   type="button"
@@ -469,15 +469,15 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               )}
             </div>
           </div>
-          <div className="text-[9px] font-bold text-violet-700 bg-violet-50 border border-violet-100/50 px-2.5 py-1 rounded-lg w-fit mt-3.5 font-mono">
-            目標目安との偏差を自動演算 →
+          <div className="text-[9px] font-bold text-violet-750 bg-violet-50 border border-violet-100 px-2.5 py-1 rounded-lg w-fit mt-3.5 font-mono">
+            目標目安との偏差を自動演算
           </div>
         </div>
 
         {/* Card 4: Reflection Sheets */}
         <div
           onClick={() => onViewSelect('reports')}
-          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
+          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-rose-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
             <div className="p-2.5 bg-rose-600 text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-rose-100">
@@ -485,8 +485,8 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors tracking-tight">
-                  答練反省・やらかしカルテ
+                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-rose-600 transition-colors tracking-tight">
+                  答練分析カルテ
                 </h3>
                 <button
                   type="button"
@@ -494,7 +494,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     e.stopPropagation();
                     setActiveCardInfo(activeCardInfo === 'reports' ? null : 'reports');
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                  className="p-1 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
                   title="説明を見る"
                 >
                   <Info className="w-3.5 h-3.5" />
@@ -515,16 +515,16 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
         {/* Card 5: Core CPA methods (志・道・進) */}
         <div
           onClick={() => onViewSelect('framework')}
-          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
+          className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-[#f39800]/40 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
-            <div className="p-2.5 bg-emerald-50 border border-emerald-150/40 text-emerald-700 rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm animate-scale-in">
-              <Compass className="w-5 h-5 text-emerald-700" />
+            <div className="p-2.5 bg-[#f39800] text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-[#f39800]/20 animate-scale-in">
+              <Compass className="w-5 h-5 text-[#fff0d4]" />
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-[#274a78] transition-colors tracking-tight">
-                  志・道・進フレームワーク
+                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-[#f39800] transition-colors tracking-tight">
+                  メソッドフレーム
                 </h3>
                 <button
                   type="button"
@@ -532,7 +532,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     e.stopPropagation();
                     setActiveCardInfo(activeCardInfo === 'framework' ? null : 'framework');
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                  className="p-1 rounded-full text-slate-400 hover:text-[#f39800] hover:bg-[#f39800]/10 transition-colors shrink-0"
                   title="説明を見る"
                 >
                   <Info className="w-3.5 h-3.5" />
@@ -540,12 +540,12 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               </div>
               {activeCardInfo === 'framework' && (
                 <div className="bg-slate-50 border border-slate-150 p-2.5 rounded-xl text-[10px] text-slate-600 font-medium leading-normal animate-scale-in">
-                  公認会計士受験期における、合格精神の絶対基準軸。本番を見据えた里程標（道）の設定。
+                  公認会計士受験期における、合格精神 of axis。本番を見据えた里程標（道）の設定。
                 </div>
               )}
             </div>
           </div>
-          <div className="text-[9px] font-bold text-emerald-850 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg w-fit mt-3.5">
+          <div className="text-[9px] font-bold text-[#f39800] bg-[#f39800]/5 border border-[#f39800]/15 px-2.5 py-1 rounded-lg w-fit mt-3.5">
             志（信念目標）＆里程標の登録
           </div>
         </div>
@@ -556,13 +556,13 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
           className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 hover:shadow-md hover:shadow-slate-100/80 transition-all text-left flex flex-col justify-between cursor-pointer group hover:-translate-y-0.5 active-scale duration-300 relative overflow-hidden"
         >
           <div className="flex items-start gap-3.5">
-            <div className="p-2.5 bg-amber-500 text-white rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-amber-50">
-              <Database className="w-5 h-5 text-amber-100" />
+            <div className="p-2.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-xl group-hover:scale-105 transition-transform shrink-0 shadow-sm shadow-slate-100">
+              <Database className="w-5 h-5 text-slate-500" />
             </div>
             <div className="space-y-1 overflow-hidden flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors tracking-tight">
-                  セキュリティ ＆ バックアップ
+                <h3 className="font-sans font-bold text-slate-900 text-xs sm:text-sm group-hover:text-slate-600 transition-colors tracking-tight">
+                  設定
                 </h3>
                 <button
                   type="button"
@@ -570,7 +570,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
                     e.stopPropagation();
                     setActiveCardInfo(activeCardInfo === 'backup' ? null : 'backup');
                   }}
-                  className="p-1 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                  className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors shrink-0"
                   title="説明を見る"
                 >
                   <Info className="w-3.5 h-3.5" />
@@ -583,7 +583,7 @@ export const CpaxDashboard: React.FC<CpaxDashboardProps> = ({
               )}
             </div>
           </div>
-          <div className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-lg w-fit mt-3.5">
+          <div className="text-[9px] font-bold text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg w-fit mt-3.5">
             ローカル保存・データ復旧
           </div>
         </div>

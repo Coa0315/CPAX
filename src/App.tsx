@@ -367,7 +367,7 @@ export default function App() {
               }`}
             >
               <BookOpen className="w-4 h-4" />
-              目次マスター（論点周回）
+              目次管理
             </button>
 
             <button
@@ -380,7 +380,7 @@ export default function App() {
               }`}
             >
               <Clock className="w-4 h-4" />
-              論点連動タイマー
+              勉強タイマー
             </button>
 
             <button
@@ -393,7 +393,7 @@ export default function App() {
               }`}
             >
               <Calendar className="w-4 h-4" />
-              計画とカレンダー
+              学習計画とカレンダー
             </button>
 
             <button
@@ -406,7 +406,7 @@ export default function App() {
               }`}
             >
               <ClipboardCheck className="w-4 h-4" />
-              答練反省カルテ
+              答練分析カルテ
             </button>
 
             <button
@@ -419,7 +419,7 @@ export default function App() {
               }`}
             >
               <Compass className="w-4 h-4" />
-              志・道・進フレーム
+              メソッドフレーム
             </button>
 
             <button
@@ -432,7 +432,7 @@ export default function App() {
               }`}
             >
               <Database className="w-4 h-4" />
-              バックアップ設定
+              設定
             </button>
           </nav>
         </div>

@@ -200,23 +200,12 @@ export const CpaxExamReports: React.FC<CpaxExamReportsProps> = ({
         <div>
           <div className="flex items-center gap-1.5 flex-wrap mb-1.5 select-none">
             <ClipboardCheck className="w-5 h-5 text-indigo-650 shrink-0" />
-            <span className="font-sans font-black text-[10px] text-slate-500 uppercase tracking-widest border-r border-slate-150 pr-2 leading-none">
-              自己分析カルテ
+            <span className="font-sans font-black text-[10px] text-slate-500 uppercase tracking-widest leading-none">
+              答練分析カルテ
             </span>
-            {currentMode === 'short' ? (
-              <span className="inline-flex items-center gap-1 font-mono text-[8.5px] bg-indigo-50 border border-indigo-100 text-indigo-700 font-black px-2 py-0.5 rounded-full leading-none shrink-0 shadow-sm shadow-indigo-100/50">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                短答式モード
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 font-mono text-[8.5px] bg-amber-50 border border-amber-100 text-amber-700 font-black px-2 py-0.5 rounded-full leading-none shrink-0 shadow-sm shadow-amber-100/50">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                論文式モード
-              </span>
-            )}
           </div>
           <h2 className="font-sans font-black text-slate-900 text-base sm:text-lg tracking-tight">
-            答練・公開模試のやらかし反省カルテ
+            答練・公開模試の自己分析ツール
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
             解いた直後の記憶がフレッシュな10分で自白し、弱点を3日後に即時召喚する自動復習学習環
@@ -553,7 +542,7 @@ export const CpaxExamReports: React.FC<CpaxExamReportsProps> = ({
 
         {/* Existing reports lists bottom */}
         <div className="space-y-3.5">
-          <h3 className="font-extrabold text-slate-800 text-xs text-left">登録済みのやらかしカルテカルテ（{reports.length}件）</h3>
+          <h3 className="font-extrabold text-slate-800 text-xs text-left">登録済みの答練分析カルテ（{reports.length}件）</h3>
           {reports.length === 0 ? (
             <div className="py-8 border border-dashed border-slate-200 rounded-2xl text-center text-slate-400 text-xs">
               カルテ履歴はありません。答練のやりっぱなし防止のため、記述を追加してください。
@@ -737,7 +726,7 @@ export const CpaxExamReports: React.FC<CpaxExamReportsProps> = ({
             <ClipboardCheck className="w-12 h-12 text-slate-300 block mb-3 stroke-1" />
             <span className="text-xs font-black text-slate-500">反省レポート未選択</span>
             <p className="text-[10px] hover:text-slate-500 max-w-[240px] mt-2 leading-relaxed font-semibold">
-              左の「登録済みのやらかしカルテ」からレポートを選択すると、印刷・PDF保存に準拠した美しいA4サイズ1枚プレビューが映し出されます。
+              左の「登録済みの答練分析カルテ」からレポートを選択すると、印刷・PDF保存に準拠した美しいA4サイズ1枚プレビューが映し出されます。
             </p>
           </div>
         )}
