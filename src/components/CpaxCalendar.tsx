@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
-import { Calendar as IconCalendar, ChevronLeft, ChevronRight, CheckSquare, Square, Plus, Trash, AlertTriangle, Clock, ShieldCheck, Heart } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Calendar as IconCalendar, ChevronLeft, ChevronRight, CheckSquare, Square, Plus, Trash, AlertTriangle, Clock, ShieldCheck, Heart, Edit2, Save, X, Target, Sparkles } from 'lucide-react';
 import { CpaxTopic, CpaxSchedule } from '../types';
 
 interface CpaxCalendarProps {
@@ -22,6 +22,7 @@ interface CpaxCalendarProps {
   ) => void;
   onToggleSchedule: (scheduleId: string, evaluation?: 'good' | 'average' | 'poor') => void;
   onDeleteSchedule: (scheduleId: string) => void;
+  onUpdateSchedule: (updated: CpaxSchedule) => void;
   targetDateStr?: string;
   targetTitle?: string;
 }
@@ -33,6 +34,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
   onAddSchedule,
   onToggleSchedule,
   onDeleteSchedule,
+  onUpdateSchedule,
   targetDateStr,
   targetTitle
 }) => {
@@ -47,6 +49,92 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
   const [timeInput, setTimeInput] = useState('09:00');
   const [isAllDay, setIsAllDay] = useState<boolean>(false);
   const [minutesInput, setMinutesInput] = useState<number>(60); // 用事の目安時間(分), 勉強目標(分)
+
+  // Load custom subject colors mapping (ローカルストレージ cpax_subject_colors)
+  const [subjectColors] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('cpax_subject_colors');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Error loading subjectColors from LS:', e);
+    }
+    return {
+      '財務会計論(計算)': '#274a78', // Deep CPA Blue
+      '財務会計論(理論)': '#3b82f6', // Azure Blue
+      '管理会計論': '#10b981', // Emerald Green
+      '監査論': '#f59e0b', // Amber Orange
+      '企業法': '#ec4899', // Pink
+      '租税法': '#8b5cf6', // Violet Purple
+      '経営学': '#6366f1'  // Indigo
+    };
+  });
+
+  // Edit schedule state
+  const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editCategory, setEditCategory] = useState<'study' | 'private' | 'other'>('study');
+  const [editTopicId, setEditTopicId] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const [editIsAllDay, setEditIsAllDay] = useState(false);
+  const [editMinutes, setEditMinutes] = useState(60);
+
+  const startEditSchedule = (sched: CpaxSchedule) => {
+    setEditingScheduleId(sched.scheduleId);
+    setEditTitle(sched.title);
+    setEditDate(sched.date);
+    setEditCategory(sched.category);
+    setEditTopicId(sched.topicId || '');
+    setEditTime(sched.timeInput === '全日' ? '00:00' : (sched.timeInput || '09:00'));
+    setEditIsAllDay(sched.timeInput === '全日');
+    setEditMinutes(sched.category === 'study' ? (sched.targetMinutes || 60) : (sched.duration || 60));
+  };
+
+  // Helper styles generator for study plan colours / white non-study plans
+  const getCalendarMicroStyles = (sched: CpaxSchedule, isSelectedCell: boolean) => {
+    const isStudy = sched.category === 'study';
+    if (!isStudy) {
+      // Non-study plans are styled white bg with standard borders
+      return {
+        backgroundColor: '#ffffff',
+        borderColor: '#e2e8f0',
+        color: sched.completed ? '#94a3b8' : '#334155',
+        textDecoration: sched.completed ? 'line-through' : 'none'
+      };
+    }
+
+    const topicObj = sched.topicId ? topics.find(t => t.id === sched.topicId) : null;
+    const subName = topicObj ? topicObj.subject : '';
+    const color = subjectColors[subName] || '#274a78';
+
+    if (isSelectedCell) {
+      return {
+        backgroundColor: color,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+        color: '#ffffff',
+        textDecoration: sched.completed ? 'line-through' : 'none',
+        opacity: sched.completed ? 0.65 : 1
+      };
+    } else {
+      if (sched.completed) {
+        return {
+          backgroundColor: `${color}10`,
+          borderColor: `${color}25`,
+          color: `${color}aa`,
+          textDecoration: 'line-through'
+        };
+      } else {
+        return {
+          backgroundColor: `${color}15`,
+          borderColor: `${color}35`,
+          color: color,
+          textDecoration: 'none'
+        };
+      }
+    }
+  };
 
   // CPAX マスター連携検索用の状態
   const [searchSubject, setSearchSubject] = useState<string>('all');
@@ -109,6 +197,45 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
       return true;
     });
   }, [topics, searchSubject, searchTextbook, searchChapter, searchKeyword, currentMode]);
+
+  // -------------------------------------------------------------
+  // Load CPA Dashboard Short Term Targets dynamically (cpax_short_term_targets)
+  // -------------------------------------------------------------
+  const shortTermTargets = useMemo(() => {
+    try {
+      const stored = localStorage.getItem('cpax_short_term_targets');
+      if (stored) {
+        return JSON.parse(stored) as { id: string; title: string; date: string }[];
+      }
+    } catch (e) {
+      console.error('Error load cpax_short_term_targets:', e);
+    }
+    return [
+      { id: 'st-1', title: '第1回 短答直前答練', date: '2026-07-20' },
+      { id: 'st-2', title: '全統公開模試', date: '2026-10-15' },
+      { id: 'st-3', title: '財務会計論 1周完了目標', date: '2026-06-30' }
+    ];
+  }, [schedules]);
+
+  // Automated Synchronization with schedules
+  useEffect(() => {
+    shortTermTargets.forEach((st) => {
+      const alreadyAdded = schedules.some(
+        s => s.date === st.date && (s.title === `🎯【短期目標】${st.title}` || s.title.includes(st.title))
+      );
+      if (!alreadyAdded) {
+        onAddSchedule(
+          `🎯【短期目標】${st.title}`,
+          st.date,
+          'other',
+          undefined,
+          '全日',
+          undefined,
+          60
+        );
+      }
+    });
+  }, [shortTermTargets, schedules, onAddSchedule]);
 
   // -------------------------------------------------------------
   // Load CPA Method Framework V2 priority Tasks dynamically
@@ -388,15 +515,8 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                       key={sched.scheduleId}
                       type="button"
                       onClick={() => onToggleSchedule(sched.scheduleId)}
-                      className={`shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold transition-all hover:scale-102 cursor-pointer active:scale-95 ${
-                        isCompleted
-                          ? 'bg-slate-150/40 border-slate-200 text-slate-400 line-through'
-                          : isStudy
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/80'
-                            : isOther
-                              ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100/80'
-                              : 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100/80'
-                      }`}
+                      style={getCalendarMicroStyles(sched, false)}
+                      className="shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold transition-all hover:scale-102 cursor-pointer active:scale-95"
                       title="クリックで完了/未完了を切替"
                     >
                       <span className="text-[11px] leading-none shrink-0">{isStudy ? '🎓' : isOther ? '🤝' : '☕'}</span>
@@ -415,7 +535,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                                 ? 'text-amber-500 font-extrabold'
                                 : 'text-rose-500 font-extrabold'
                             : 'text-indigo-600'
-                          : 'text-slate-400'
+                          : 'text-slate-450'
                       }`}>
                         {isCompleted
                           ? isStudy && sched.evaluation
@@ -493,23 +613,11 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                     {hasSchedules.slice(0, 3).map((sched) => {
                       const isStudy = sched.category === 'study';
                       const isOther = sched.category === 'other';
-                      const isCompleted = sched.completed;
                       return (
                         <div
                           key={sched.scheduleId}
-                          className={`text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded leading-tight truncate border flex items-center gap-1 ${
-                            isSelected
-                              ? isStudy
-                                ? 'bg-indigo-900 border-indigo-800 text-indigo-100'
-                                : isOther
-                                  ? 'bg-blue-900 border-blue-800 text-blue-100'
-                                  : 'bg-slate-800 border-slate-700 text-slate-200 font-medium'
-                              : isStudy
-                                ? `${isCompleted ? 'bg-emerald-50/50 text-emerald-700/60 border-emerald-100/30 line-through' : 'bg-emerald-50 text-emerald-800 border-emerald-100/60'}`
-                                : isOther
-                                  ? `${isCompleted ? 'bg-blue-50/50 text-blue-700/60 border-blue-100/30 line-through' : 'bg-blue-50 text-blue-800 border-blue-100/60'}`
-                                  : `${isCompleted ? 'bg-rose-50/50 text-rose-700/60 border-rose-100/30 line-through' : 'bg-rose-50 text-rose-800 border-rose-100/60'}`
-                          }`}
+                          style={getCalendarMicroStyles(sched, isSelected)}
+                          className="text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded leading-tight truncate border flex items-center gap-1"
                           title={`${isStudy ? '🎓' : isOther ? '🤝' : '☕'} ${sched.timeInput || ''} ${getDisplayTitle(sched)}`}
                         >
                           <span className="shrink-0">{isStudy ? '🎓' : isOther ? '🤝' : '☕'}</span>
@@ -521,7 +629,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                     })}
                     {hasSchedules.length > 3 && (
                       <div className={`text-[7.5px] sm:text-[8px] text-center font-black py-0.5 rounded leading-none select-none ${
-                        isSelected ? 'text-indigo-300' : 'text-slate-400 bg-slate-100'
+                        isSelected ? 'text-indigo-300' : 'text-slate-450 bg-slate-100'
                       }`}>
                         他 {hasSchedules.length - 3} 件
                       </div>
@@ -579,46 +687,6 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
           )}
         </div>
 
-        {/* CPA Framework high-priority task injection area */}
-        <div className="bg-gradient-to-br from-indigo-50/35 to-white border border-indigo-150/40 rounded-2xl p-4 space-y-2 text-left">
-          <div className="flex items-center gap-1.5 justify-between">
-            <span className="text-[8px] font-extrabold tracking-widest text-indigo-600 block uppercase font-mono">🏆今期の最優先TODO（フレームワーク連動）</span>
-            <span className="text-[9px] bg-indigo-600 text-white font-extrabold px-1.5 py-0.5 rounded-md scale-95 leading-none">Aランク</span>
-          </div>
-          <p className="text-[10px] text-slate-400 font-semibold tracking-tight leading-normal">
-            【志・道・進】フレームワークの「優先順位：高」の戦略タスクが自動連動しています。タップして一撃で予定時間と内容をフォームに自動注入します。
-          </p>
-
-          {frameworkPriorityTasks.length === 0 ? (
-            <div className="text-center py-4 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl text-slate-400 text-[10px] font-bold select-none leading-normal">
-              現在、高優先度の戦略タスクはありません。<br />
-              コントロール部の【道】タブから科目の高優先タスクを追加してください。
-            </div>
-          ) : (
-            <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-              {frameworkPriorityTasks.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => handleApplyPriorityTask(t.text, t.subjectName, t.hours)}
-                  className="w-full text-left p-2.5 bg-white hover:bg-indigo-50/40 hover:border-indigo-200 active:scale-98 transition-all border border-slate-150 rounded-xl flex items-start gap-1.5 group select-none cursor-pointer"
-                  title="このToDoをフォームに自動充填する"
-                >
-                  <span className="text-[8px] font-black bg-rose-50 border border-rose-100 text-rose-700 rounded px-1.5 py-0.2 shrink-0 mt-0.5">
-                    {t.subjectName}
-                  </span>
-                  <div className="overflow-hidden flex-1 leading-tight">
-                    <p className="text-[10px] font-bold text-slate-700 truncate group-hover:text-indigo-600">
-                      {t.text}
-                    </p>
-                    <span className="text-[8px] font-mono font-bold text-indigo-400">推奨: {t.hours}時間予定 (タップで自動充填)</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Current day TODO Checklist */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -634,18 +702,185 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
               {selectedDaySchedules.map(sched => {
                 const isStudy = sched.category === 'study';
                 const isOther = sched.category === 'other';
+
+                // Render compact inline form when this schedule is active for editing
+                if (editingScheduleId === sched.scheduleId) {
+                  return (
+                    <div 
+                      key={sched.scheduleId}
+                      className="p-4 rounded-2xl border border-indigo-200 bg-indigo-50/20 text-slate-800 space-y-3 shadow-inner"
+                    >
+                      <div className="flex items-center justify-between border-b border-indigo-150/40 pb-2">
+                        <span className="text-[9px] font-black tracking-wider text-indigo-600 uppercase font-mono">予定の編集</span>
+                        <button 
+                          type="button"
+                          onClick={() => setEditingScheduleId(null)}
+                          className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-2.5 text-xs font-bold text-slate-700">
+                        {/* Title / Memo */}
+                        <div>
+                          <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">予定名／メモ</label>
+                          <input
+                            type="text"
+                            required
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl p-2 font-bold focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        {/* Date and Category */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">日付</label>
+                            <input
+                              type="date"
+                              required
+                              value={editDate}
+                              onChange={(e) => setEditDate(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-xl p-2 font-bold focus:outline-none focus:border-indigo-500 text-center"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">タイプ</label>
+                            <select
+                              value={editCategory}
+                              onChange={(e) => {
+                                const val = e.target.value as 'study' | 'private' | 'other';
+                                setEditCategory(val);
+                                if (val !== 'study') {
+                                  setEditTopicId('');
+                                }
+                              }}
+                              className="w-full bg-white border border-slate-200 rounded-xl p-2 font-bold focus:outline-none focus:border-indigo-500"
+                            >
+                              <option value="study">🎓 学習計画</option>
+                              <option value="private">☕ プライベート</option>
+                              <option value="other">🤝 面談・その他</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Time & AllDay */}
+                        <div className="grid grid-cols-2 gap-2 items-end">
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">開始時刻</label>
+                              <label className="flex items-center gap-1 cursor-pointer select-none leading-none">
+                                <input
+                                  type="checkbox"
+                                  checked={editIsAllDay}
+                                  onChange={(e) => setEditIsAllDay(e.target.checked)}
+                                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3 h-3"
+                                />
+                                <span className="text-[8px] font-bold text-slate-500 leading-none">全日</span>
+                              </label>
+                            </div>
+                            <input
+                              type="time"
+                              value={editIsAllDay ? "00:00" : editTime}
+                              disabled={editIsAllDay}
+                              onChange={(e) => setEditTime(e.target.value)}
+                              className={`w-full bg-white border border-slate-200 rounded-xl p-2 text-center font-bold focus:outline-none ${editIsAllDay ? 'opacity-40 bg-slate-100' : ''}`}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">
+                              {editCategory === 'study' ? '目標時間 (分)' : '拘束時間 (分)'}
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={editMinutes}
+                              onChange={(e) => setEditMinutes(Number(e.target.value))}
+                              className="w-full bg-white border border-slate-200 rounded-xl p-2 font-bold focus:outline-none focus:border-indigo-500 text-center"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Syllabus selection (Only if Category study is chosen) */}
+                        {editCategory === 'study' && (
+                          <div className="pt-2 border-t border-dashed border-indigo-100">
+                            <label className="block text-[8px] font-extrabold text-slate-400 mb-1">CPAX 目次マスター連携（串通し）</label>
+                            <select
+                              value={editTopicId}
+                              onChange={(e) => {
+                                const id = e.target.value;
+                                setEditTopicId(id);
+                                const topicObj = topics.find(t => t.id === id);
+                                if (topicObj) {
+                                  setEditTitle(`[${topicObj.subject}] ${topicObj.textbook || 'テキスト'} ➜ ${topicObj.name}`);
+                                  setEditMinutes(topicObj.estimatedMinutes || 45);
+                                }
+                              }}
+                              className="w-full bg-white border border-slate-200 rounded-lg p-1.5 font-bold focus:outline-none truncate"
+                            >
+                              <option value="">-- 自習（目次に紐付けないフリー勉強） --</option>
+                              {topics
+                                .filter(t => {
+                                  if (currentMode === 'short') {
+                                    if (t.isEssayOnly || t.subject === '租税法' || t.subject === '経営学') return false;
+                                  }
+                                  return true;
+                                })
+                                .map(t => (
+                                  <option key={t.id} value={t.id}>
+                                    [{t.subject}] {t.textbook || 'テキスト'} ➜ {t.name}
+                                  </option>
+                                ))
+                              }
+                            </select>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-2 pt-2 border-t border-indigo-100/50">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!editTitle.trim()) return;
+                            const updatedSched: CpaxSchedule = {
+                              ...sched,
+                              title: editTitle.trim(),
+                              date: editDate,
+                              category: editCategory,
+                              topicId: editCategory === 'study' && editTopicId ? editTopicId : undefined,
+                              timeInput: editIsAllDay ? '全日' : editTime,
+                              targetMinutes: editCategory === 'study' ? editMinutes : undefined,
+                              duration: editCategory !== 'study' ? editMinutes : undefined
+                            };
+                            onUpdateSchedule(updatedSched);
+                            setEditingScheduleId(null);
+                          }}
+                          className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-[11px] flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          変更を保存
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingScheduleId(null)}
+                          className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-[11px] cursor-pointer"
+                        >
+                          キャンセル
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Normal list view rendering
                 return (
                   <div
                     key={sched.scheduleId}
-                    className={`p-3 rounded-2xl border transition-all flex items-center justify-between ${
-                      sched.completed
-                        ? 'bg-slate-50/70 border-slate-100 text-slate-400 line-through'
-                        : isOther
-                          ? 'bg-blue-50/30 border-blue-100/40 text-slate-800'
-                          : sched.category === 'private'
-                            ? 'bg-rose-50/30 border-rose-100/40 text-slate-800'
-                            : 'bg-white border-slate-100 text-slate-800 shadow-sm'
-                    }`}
+                    style={getCalendarMicroStyles(sched, false)}
+                    className="p-3 rounded-2xl border transition-all flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2.5 overflow-hidden flex-1 text-left">
                       {isStudy ? (
@@ -727,13 +962,27 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => onDeleteSchedule(sched.scheduleId)}
-                      className="p-2.5 text-slate-300 hover:text-rose-600 transition-colors cursor-pointer shrink-0 ml-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                      title="計画を削除"
-                    >
-                      <Trash className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {/* Edit Button */}
+                      <button
+                        type="button"
+                        onClick={() => startEditSchedule(sched)}
+                        className="p-2 text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
+                        title="計画を編集"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      
+                      {/* Delete Button */}
+                      <button
+                        type="button"
+                        onClick={() => onDeleteSchedule(sched.scheduleId)}
+                        className="p-2 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
+                        title="計画を削除"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -943,6 +1192,101 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
             計画を行動表に登録する
           </button>
         </form>
+
+        {/* CPA Dashboard Short Term Goal Sync Area */}
+        <div className="bg-gradient-to-br from-indigo-50/25 to-white border border-indigo-150/40 rounded-2xl p-4 space-y-2 text-left">
+          <div className="flex items-center gap-1.5 justify-between">
+            <span className="text-[8px] font-extrabold tracking-widest text-indigo-600 block uppercase font-mono">🎯短期目標カレンダー自動同期</span>
+            <span className="text-[9px] bg-indigo-100 text-indigo-700 font-extrabold px-1.5 py-0.5 rounded-md scale-95 leading-none">自動同期中</span>
+          </div>
+          <p className="text-[10px] text-slate-400 font-semibold tracking-tight leading-normal">
+            ダッシュボードで設定した短期目標（直前答練や模擬試験等）は、すべて自動でカレンダーの特定日に「🎯【短期目標】」として予定登録されます。
+          </p>
+
+          <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 pt-1 border-t border-slate-100">
+            {shortTermTargets.map((st) => {
+              const isAdded = schedules.some(
+                s => s.date === st.date && (s.title === `🎯【短期目標】${st.title}` || s.title.includes(st.title))
+              );
+              return (
+                <div
+                  key={st.id}
+                  className="p-2.5 bg-white border border-slate-150 rounded-xl flex items-center justify-between gap-1.5"
+                >
+                  <div className="overflow-hidden leading-tight flex-1">
+                    <p className="text-[10px] font-bold text-slate-700 truncate">
+                      {st.title}
+                    </p>
+                    <span className="text-[8.5px] font-mono text-slate-400">日付: {st.date}</span>
+                  </div>
+                  {isAdded ? (
+                    <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full font-extrabold shrink-0">
+                      同期済
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onAddSchedule(
+                          `🎯【短期目標】${st.title}`,
+                          st.date,
+                          'other',
+                          undefined,
+                          '全日',
+                          undefined,
+                          60
+                        );
+                      }}
+                      className="text-[9px] bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-2.5 py-1 rounded-lg cursor-pointer active:scale-95 shrink-0"
+                    >
+                      手動追加
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CPA Framework high-priority task injection area */}
+        <div className="bg-gradient-to-br from-indigo-50/35 to-white border border-indigo-150/40 rounded-2xl p-4 space-y-2 text-left">
+          <div className="flex items-center gap-1.5 justify-between">
+            <span className="text-[8px] font-extrabold tracking-widest text-indigo-600 block uppercase font-mono">🏆今期の最優先TODO（フレームワーク連動）</span>
+            <span className="text-[9px] bg-indigo-600 text-white font-extrabold px-1.5 py-0.5 rounded-md scale-95 leading-none">Aランク</span>
+          </div>
+          <p className="text-[10px] text-slate-400 font-semibold tracking-tight leading-normal">
+            【志・道・進】フレームワークの「優先順位：高」の戦略タスクが自動連動しています。タップして一撃で予定時間と内容をフォームに自動注入します。
+          </p>
+
+          {frameworkPriorityTasks.length === 0 ? (
+            <div className="text-center py-4 bg-slate-50/50 border border-dashed border-slate-200 rounded-xl text-slate-400 text-[10px] font-bold select-none leading-normal">
+              現在、高優先度の戦略タスクはありません。<br />
+              コントロール部の【道】タブから科目の高優先タスクを追加してください。
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+              {frameworkPriorityTasks.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => handleApplyPriorityTask(t.text, t.subjectName, t.hours)}
+                  className="w-full text-left p-2.5 bg-white hover:bg-indigo-50/40 hover:border-indigo-200 active:scale-98 transition-all border border-slate-150 rounded-xl flex items-start gap-1.5 group select-none cursor-pointer"
+                  title="このToDoをフォームに自動充填する"
+                >
+                  <span className="text-[8px] font-black bg-rose-50 border border-rose-100 text-rose-700 rounded px-1.5 py-0.2 shrink-0 mt-0.5">
+                    {t.subjectName}
+                  </span>
+                  <div className="overflow-hidden flex-1 leading-tight">
+                    <p className="text-[10px] font-bold text-slate-700 truncate group-hover:text-indigo-600">
+                      {t.text}
+                    </p>
+                    <span className="text-[8px] font-mono font-bold text-indigo-400">推奨: {t.hours}時間予定 (タップで自動充填)</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -210,6 +210,31 @@ export default function App() {
     localStorage.setItem('cpax_history', JSON.stringify(nextHistory));
   };
 
+  // Update / Edit individual plan after creation (with dynamic history synchronization)
+  const handleUpdateSchedule = (updated: CpaxSchedule) => {
+    const nextSchedules = schedules.map(s => s.scheduleId === updated.scheduleId ? updated : s);
+    setSchedules(nextSchedules);
+    localStorage.setItem('cpax_schedules', JSON.stringify(nextSchedules));
+
+    // Sync history if it's a study schedule and has an active linked history record
+    const hasHistory = history.some(h => h.scheduleId === updated.scheduleId);
+    if (hasHistory) {
+      const nextHistory = history.map(h => {
+        if (h.scheduleId === updated.scheduleId) {
+          return {
+            ...h,
+            topicId: updated.topicId || h.topicId,
+            date: updated.date,
+            duration: updated.targetMinutes || h.duration
+          };
+        }
+        return h;
+      });
+      setHistory(nextHistory);
+      localStorage.setItem('cpax_history', JSON.stringify(nextHistory));
+    }
+  };
+
   // Add reflection exam report (答練・模試のやらかしシート、3日後自動強制カレンダー召喚 & 目次履歴流し込み)
   const handleAddReport = (
     newReport: Omit<CpaxExamReport, 'reportId' | 'scheduledReviewIds'> & {
@@ -506,6 +531,7 @@ export default function App() {
             onAddSchedule={handleAddSchedule}
             onToggleSchedule={handleToggleSchedule}
             onDeleteSchedule={handleDeleteSchedule}
+            onUpdateSchedule={handleUpdateSchedule}
             targetDateStr={targetDateStr}
             targetTitle={targetTitle}
           />
