@@ -335,103 +335,103 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row antialiased select-none">
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-slate-950 text-white shrink-0 shadow-xl md:min-h-screen flex flex-col justify-between no-print border-r border-slate-900">
-        <div className="p-5 space-y-6">
+      <aside className="w-full md:w-[272px] bg-slate-950 text-white shrink-0 shadow-xl md:min-h-screen flex flex-col justify-between no-print border-r border-slate-900 overflow-x-hidden">
+        <div className="px-4 py-5 space-y-6 w-full max-w-full">
           {/* Logo Brand Zone */}
-          <div className="flex items-center">
+          <div className="flex items-center px-1">
             <CpaxLogo variant="full" size={38} />
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex flex-col gap-1.5 text-left">
+          <nav className="flex flex-col gap-1.5 text-left w-full max-w-full">
             <button
               id="nav-btn-dashboard"
               onClick={() => setCurrentView('dashboard')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'dashboard'
                   ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
-              <Home className="w-4 h-4" />
+              <Home className="w-4 h-4 text-[#8daecf]" />
               ダッシュボード
             </button>
 
             <button
               id="nav-btn-content_tree"
               onClick={() => setCurrentView('content_tree')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'content_tree'
                   ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="w-4 h-4 text-[#8daecf]" />
               目次管理
             </button>
 
             <button
               id="nav-btn-timer"
               onClick={() => setCurrentView('timer')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'timer'
                   ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
-              <Clock className="w-4 h-4" />
+              <Clock className="w-4 h-4 text-[#8daecf]" />
               勉強タイマー
             </button>
 
             <button
               id="nav-btn-calendar"
               onClick={() => setCurrentView('calendar')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'calendar'
                   ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-4 h-4 text-[#8daecf]" />
               学習計画とカレンダー
             </button>
 
             <button
               id="nav-btn-reports"
               onClick={() => setCurrentView('reports')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'reports'
                   ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
-              <ClipboardCheck className="w-4 h-4" />
+              <ClipboardCheck className="w-4 h-4 text-[#8daecf]" />
               答練分析カルテ
             </button>
 
             <button
               id="nav-btn-framework"
               onClick={() => setCurrentView('framework')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'framework'
                   ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
-              <Compass className="w-4 h-4" />
+              <Compass className="w-4 h-4 text-[#8daecf]" />
               メソッドフレーム
             </button>
 
             <button
               id="nav-btn-backup"
               onClick={() => setCurrentView('backup')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 currentView === 'backup'
                   ? 'bg-[#274a78] text-white shadow-md shadow-slate-950/50 font-extrabold'
                   : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
-              <Database className="w-4 h-4" />
+              <Database className="w-4 h-4 text-[#8daecf]" />
               設定
             </button>
           </nav>

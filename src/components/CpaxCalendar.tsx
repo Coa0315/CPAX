@@ -556,17 +556,17 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
         <form onSubmit={handleSubmitPlan} className="bg-slate-50/70 border border-slate-100 rounded-2xl p-4 shadow-inner space-y-4 text-left">
           <h4 className="font-bold text-slate-900 text-xs text-left">予定の新規追加</h4>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
+          <div className="flex items-center gap-3.5 w-full">
+            <div className="w-28 shrink-0">
               <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">開始時刻</label>
               <input
                 type="time"
                 value={timeInput}
                 onChange={(e) => setTimeInput(e.target.value)}
-                className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl p-2 text-xs font-bold focus:outline-none min-h-[44px]"
+                className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl px-2 py-2 text-xs font-bold focus:outline-none min-h-[44px] text-center"
               />
             </div>
-            <div>
+            <div className="w-40 shrink-0 ml-auto">
               <label className="block text-[8px] font-extrabold text-indigo-900/60 uppercase tracking-widest mb-1">計画タイプ</label>
               <select
                 value={category}
@@ -580,7 +580,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                     setMinutesInput(60); // 勉強初期値 60分
                   }
                 }}
-                className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl p-2 text-xs font-black focus:outline-none min-h-[44px]"
+                className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs font-black focus:outline-none min-h-[44px]"
               >
                 <option value="study">🎓 学習計画</option>
                 <option value="private">☕ プライベート用事</option>

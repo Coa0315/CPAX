@@ -120,6 +120,8 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
 
   // Self-made safe inline deletion confirmation to bypass iPad browser iframe restrictions
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null);
+  const [deletingTextbookKey, setDeletingTextbookKey] = useState<string | null>(null); // subject::textbook
+  const [deletingChapterKey, setDeletingChapterKey] = useState<string | null>(null); // subject::textbook::category
 
   // Manual New Item insertion form states
   const [activeAddTopicInChapter, setActiveAddTopicInChapter] = useState<{ subject: string, textbook: string, category: string } | null>(null);
@@ -584,6 +586,18 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
     }
   };
 
+  const handleDeleteTextbook = (subject: string, tbookName: string) => {
+    const updated = topics.filter(t => !(t.subject === subject && t.textbook === tbookName));
+    onUpdateTopics(updated);
+    setDeletingTextbookKey(null);
+  };
+
+  const handleDeleteChapter = (subject: string, tbookName: string, categoryName: string) => {
+    const updated = topics.filter(t => !(t.subject === subject && t.textbook === tbookName && t.category === categoryName));
+    onUpdateTopics(updated);
+    setDeletingChapterKey(null);
+  };
+
   const renderEvaluationBadge = (evalValue: 'good' | 'average' | 'poor') => {
     switch (evalValue) {
       case 'good':
@@ -599,8 +613,8 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
     <div className="space-y-6 text-left font-sans animate-fade-in" id="cpax-content-tree-view">
       
       {/* Search and Action Dashboard Bar */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-1 flex-col sm:flex-row items-center gap-3">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-wrap">
+        <div className="flex flex-1 flex-col sm:flex-row items-center gap-3 min-w-[280px]">
           <div className="relative w-full sm:max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
             <input
@@ -612,7 +626,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
             />
           </div>
 
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2 w-full sm:w-auto flex-wrap">
             <select
               value={selectedSubject}
               onChange={(e) => {
@@ -624,17 +638,6 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
               <option value="all">科目: すべて</option>
               {availableSubjects.map(sub => (
                 <option key={sub} value={sub}>{sub}</option>
-              ))}
-            </select>
-
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-40 bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-2xl px-3 py-3 text-xs font-black text-slate-700 focus:outline-none transition-all cursor-pointer"
-            >
-              <option value="all">各目次: すべて</option>
-              {availableCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
 
@@ -651,13 +654,13 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
         </div>
 
         {/* Administration control switches */}
-        <div className="flex items-center gap-2 shrink-0 md:border-l md:border-slate-100 md:pl-4">
+        <div className="flex items-center gap-2 flex-wrap shrink-0 md:border-l md:border-slate-100 md:pl-4">
           <button
             onClick={() => {
               setShowSubjectManager(!showSubjectManager);
               setIsEditingMode(false);
             }}
-            className={`flex items-center gap-1.5 px-4 py-3 cursor-pointer rounded-2xl text-xs font-extrabold transition-all border ${
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 cursor-pointer rounded-2xl text-xs font-extrabold transition-all border ${
               showSubjectManager 
                 ? 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600 shadow-md scale-95' 
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
@@ -674,7 +677,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
               setEditingTopicId(null);
               setDeletingTopicId(null);
             }}
-            className={`flex items-center gap-1.5 px-4 py-3 cursor-pointer rounded-2xl text-xs font-extrabold transition-all border ${
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 cursor-pointer rounded-2xl text-xs font-extrabold transition-all border ${
               isEditingMode 
                 ? 'bg-amber-500 hover:bg-amber-600 text-white border-amber-500 shadow-md scale-95' 
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
@@ -686,7 +689,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
 
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 px-4 border border-slate-900 bg-slate-950 hover:bg-slate-850 text-white rounded-2xl text-xs font-extrabold py-3 shadow-md shadow-slate-950/20 cursor-pointer active-scale"
+            className="flex items-center gap-1.5 px-3 sm:px-4 border border-slate-900 bg-slate-950 hover:bg-slate-850 text-white rounded-2xl text-xs font-extrabold py-3 shadow-md shadow-slate-950/20 cursor-pointer active-scale"
           >
             <UploadCloud className="w-4 h-4" />
             一括インポート
@@ -1120,20 +1123,51 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
 
                             <div className="flex items-center gap-1.5 shrink-0">
                               {isEditingMode && (
-                                <button
-                                  onClick={() => {
-                                    if (activeAddChapterInTextbook === tbKey) {
-                                      setActiveAddChapterInTextbook(null);
-                                    } else {
-                                      setActiveAddChapterInTextbook(tbKey);
-                                      setNewChapterName('');
-                                    }
-                                  }}
-                                  className="px-2.5 py-1 bg-white border border-slate-200 text-slate-800 hover:bg-slate-100 rounded-lg text-[9px] font-extrabold cursor-pointer shadow-sm transition-all flex items-center gap-1"
-                                >
-                                  <Plus className="w-3 h-3 text-indigo-600" />
-                                  章の追加
-                                </button>
+                                <>
+                                  {deletingTextbookKey === tbKey ? (
+                                    <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 rounded-lg p-0.5 px-1.5 animate-pulse">
+                                      <span className="text-[8px] font-black text-rose-600">全削除OK?</span>
+                                      <button
+                                        onClick={() => handleDeleteTextbook(subj, tbookName)}
+                                        className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[8px] tracking-tighter font-extrabold cursor-pointer"
+                                      >
+                                        はい
+                                      </button>
+                                      <button
+                                        onClick={() => setDeletingTextbookKey(null)}
+                                        className="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[8px] tracking-tighter font-extrabold cursor-pointer"
+                                      >
+                                        戻る
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => {
+                                        setDeletingTextbookKey(tbKey);
+                                        setDeletingChapterKey(null);
+                                      }}
+                                      className="px-2 py-1 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-[9px] font-extrabold cursor-pointer transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <Trash2 className="w-3 h-3 text-rose-500" />
+                                      教材の削除
+                                    </button>
+                                  )}
+
+                                  <button
+                                    onClick={() => {
+                                      if (activeAddChapterInTextbook === tbKey) {
+                                        setActiveAddChapterInTextbook(null);
+                                      } else {
+                                        setActiveAddChapterInTextbook(tbKey);
+                                        setNewChapterName('');
+                                      }
+                                    }}
+                                    className="px-2.5 py-1 bg-white border border-slate-200 text-slate-800 hover:bg-slate-100 rounded-lg text-[9px] font-extrabold cursor-pointer shadow-sm transition-all flex items-center gap-1"
+                                  >
+                                    <Plus className="w-3 h-3 text-indigo-600" />
+                                    章の追加
+                                  </button>
+                                </>
                               )}
                             </div>
                           </div>
@@ -1205,6 +1239,35 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
 
                                         <div className="flex items-center gap-1.5 shrink-0">
                                           {isEditingMode && (
+                                            <>
+                                              {deletingChapterKey === chKey ? (
+                                                <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 rounded-lg p-0.5 px-1.5 animate-pulse">
+                                                  <span className="text-[8px] font-black text-rose-600">全削除OK?</span>
+                                                  <button
+                                                    onClick={() => handleDeleteChapter(subj, tbookName, categoryName)}
+                                                    className="px-1.5 py-0.5 bg-rose-600 text-white rounded text-[8px] tracking-tighter font-extrabold cursor-pointer"
+                                                  >
+                                                    はい
+                                                  </button>
+                                                  <button
+                                                    onClick={() => setDeletingChapterKey(null)}
+                                                    className="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[8px] tracking-tighter font-extrabold cursor-pointer"
+                                                  >
+                                                    戻る
+                                                  </button>
+                                                </div>
+                                              ) : (
+                                                <button
+                                                  onClick={() => {
+                                                    setDeletingChapterKey(chKey);
+                                                    setDeletingTextbookKey(null);
+                                                  }}
+                                                  className="px-2 py-1 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-[9px] font-extrabold cursor-pointer transition-all flex items-center gap-1 shadow-sm"
+                                                >
+                                                  <Trash2 className="w-3 h-3 text-rose-500" />
+                                                  章の削除
+                                                </button>
+                                              )}
                                             <button
                                               onClick={() => {
                                                 if (activeAddTopicInChapter?.category === categoryName && activeAddTopicInChapter?.textbook === tbookName && activeAddTopicInChapter?.subject === subj) {
@@ -1220,7 +1283,8 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                                               <Plus className="w-3 h-3 text-slate-550" />
                                               個別問題カードの追加
                                             </button>
-                                          )}
+                                          </>
+                                        )}
                                         </div>
                                       </div>
 
