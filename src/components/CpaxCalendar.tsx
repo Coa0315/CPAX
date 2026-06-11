@@ -50,6 +50,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
   // CPAX マスター連携検索用の状態
   const [searchSubject, setSearchSubject] = useState<string>('all');
   const [searchTextbook, setSearchTextbook] = useState<string>('all');
+  const [searchChapter, setSearchChapter] = useState<string>('all');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
 
   // 検索・フィルタリング用の選択可能リスト
@@ -72,6 +73,18 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
     return Array.from(new Set(filtered.map(t => t.textbook || 'テキスト1'))).filter(Boolean);
   }, [topics, searchSubject, currentMode]);
 
+  const availableChaptersForSearch = useMemo(() => {
+    const filtered = topics.filter(t => {
+      if (currentMode === 'short') {
+        if (t.isEssayOnly || t.subject === '租税法' || t.subject === '経営学') return false;
+      }
+      if (searchSubject !== 'all' && t.subject !== searchSubject) return false;
+      if (searchTextbook !== 'all' && (t.textbook || 'テキスト1') !== searchTextbook) return false;
+      return true;
+    });
+    return Array.from(new Set(filtered.map(t => t.category))).filter(Boolean);
+  }, [topics, searchSubject, searchTextbook, currentMode]);
+
   // 絞り込まれた論点のリスト
   const filteredTopicsForSelect = useMemo(() => {
     return topics.filter(t => {
@@ -83,6 +96,8 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
       if (searchSubject !== 'all' && t.subject !== searchSubject) return false;
       // テキスト一致
       if (searchTextbook !== 'all' && (t.textbook || 'テキスト1') !== searchTextbook) return false;
+      // 章（カテゴリ）一致
+      if (searchChapter !== 'all' && t.category !== searchChapter) return false;
       // キーワード一致
       if (searchKeyword.trim() !== '') {
         const word = searchKeyword.toLowerCase();
@@ -92,7 +107,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
       }
       return true;
     });
-  }, [topics, searchSubject, searchTextbook, searchKeyword, currentMode]);
+  }, [topics, searchSubject, searchTextbook, searchChapter, searchKeyword, currentMode]);
 
   // -------------------------------------------------------------
   // Load CPA Method Framework V2 priority Tasks dynamically
@@ -228,7 +243,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
       if (associatedTopicId) {
         const topicObj = topics.find(t => t.id === associatedTopicId);
         if (topicObj) {
-          finalTitle = `[${topicObj.subject}] ${topicObj.name}`;
+          finalTitle = `[${topicObj.subject}] ${topicObj.category} > ${topicObj.name}`;
         }
       }
     } else {
@@ -594,7 +609,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                 <span className="text-[9px] font-black tracking-widest text-indigo-600 block">🔍 連携データの検索 & 絞り込み</span>
                 
                 {/* 検索コントロール群 */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="block text-[8px] font-bold text-slate-400 mb-0.5">科目</label>
                     <select
@@ -602,6 +617,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                       onChange={(e) => {
                         setSearchSubject(e.target.value);
                         setSearchTextbook('all'); // 科目が変わったらテキストを初期化
+                        setSearchChapter('all'); // 章も初期化
                       }}
                       className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-[10px] font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
                     >
@@ -616,12 +632,29 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                     <label className="block text-[8px] font-bold text-slate-400 mb-0.5">テキスト・教材</label>
                     <select
                       value={searchTextbook}
-                      onChange={(e) => setSearchTextbook(e.target.value)}
+                      onChange={(e) => {
+                        setSearchTextbook(e.target.value);
+                        setSearchChapter('all'); // 章も初期化
+                      }}
                       className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-[10px] font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
                     >
                       <option value="all">すべて</option>
                       {availableTextbooksForSearch.map(tb => (
                         <option key={tb} value={tb}>{tb}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[8px] font-bold text-slate-400 mb-0.5">章・節</label>
+                    <select
+                      value={searchChapter}
+                      onChange={(e) => setSearchChapter(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-[10px] font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
+                    >
+                      <option value="all">すべて</option>
+                      {availableChaptersForSearch.map(chap => (
+                        <option key={chap} value={chap}>{chap}</option>
                       ))}
                     </select>
                   </div>
@@ -648,7 +681,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                       setAssociatedTopicId(id);
                       const topicObj = topics.find(t => t.id === id);
                       if (topicObj) {
-                        setTitle(`[${topicObj.subject}] ${topicObj.name}`);
+                        setTitle(`[${topicObj.subject}] ${topicObj.category} > ${topicObj.name}`);
                         setMinutesInput(topicObj.estimatedMinutes || 45); // 指標目安時間を自動インジェクション
                       } else {
                         setTitle('');
@@ -659,7 +692,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                     <option value="">-- 自習（目次に紐付けないフリー勉強） --</option>
                     {filteredTopicsForSelect.map(t => (
                       <option key={t.id} value={t.id}>
-                        [{t.subject}] {t.textbook || 'テキスト'} ➜ {t.name}
+                        [{t.subject}] {t.textbook || 'テキスト'} ➜ {t.category} ➜ {t.name}
                       </option>
                     ))}
                   </select>
@@ -671,7 +704,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
-                    min="5"
+                    min="1"
                     max="600"
                     value={minutesInput}
                     onChange={(e) => setMinutesInput(Number(e.target.value))}
@@ -687,7 +720,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  min="5"
+                  min="1"
                   max="1440"
                   value={minutesInput}
                   onChange={(e) => setMinutesInput(Number(e.target.value))}
