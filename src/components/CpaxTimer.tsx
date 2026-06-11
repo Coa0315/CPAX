@@ -253,7 +253,7 @@ export const CpaxTimer: React.FC<CpaxTimerProps> = ({
                   })
                   .map(t => (
                     <option key={t.id} value={t.id}>
-                      [{t.subject}] {t.name} (基準目安: {t.estimatedMinutes}分)
+                      [{t.subject}] {t.name} {t.estimatedMinutes ? `(基準目安: ${t.estimatedMinutes}分)` : '(目安: 未設定)'}
                     </option>
                   ))}
               </select>

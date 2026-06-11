@@ -18,6 +18,7 @@ export interface CpaxTopic {
   name: string; // Topic name
   isEssayOnly?: boolean; // If true, only visible under論文式
   estimatedMinutes?: number; // Target reference study minutes
+  resourceType?: 'material' | 'lecture'; // 教材 (material) vs 講義 (lecture)
 }
 
 // History item when user studies a topic

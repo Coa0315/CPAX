@@ -37,6 +37,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedResourceType, setSelectedResourceType] = useState<string>('all');
   
   // Custom Subject order and addition
   const [subjectOrder, setSubjectOrder] = useState<string[]>(() => {
@@ -60,6 +61,32 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
   });
   const [showSubjectManager, setShowSubjectManager] = useState(false);
   const [newSubjectInput, setNewSubjectInput] = useState('');
+
+  // Custom Subject colors mapping (ローカルストレージ cpax_subject_colors)
+  const [subjectColors, setSubjectColors] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('cpax_subject_colors');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Error loading subjectColors from LS:', e);
+    }
+    return {
+      '財務会計論(計算)': '#274a78', // Deep CPA Blue
+      '財務会計論(理論)': '#3b82f6', // Azure Blue
+      '管理会計論': '#10b981', // Emerald Green
+      '監査論': '#f59e0b', // Amber Orange
+      '企業法': '#ec4899', // Pink
+      '租税法': '#8b5cf6', // Violet Purple
+      '経営学': '#6366f1'  // Indigo
+    };
+  });
+
+  const saveSubjectColors = (colors: Record<string, string>) => {
+    setSubjectColors(colors);
+    localStorage.setItem('cpax_subject_colors', JSON.stringify(colors));
+  };
 
   // Accordion Expand/Collapse States
   // Level 1: Subjects (財務会計、監査 etc)
@@ -88,7 +115,8 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
   const [editFormName, setEditFormName] = useState('');
   const [editFormTextbook, setEditFormTextbook] = useState('');
   const [editFormCategory, setEditFormCategory] = useState('');
-  const [editFormMinutes, setEditFormMinutes] = useState(45);
+  const [editFormMinutes, setEditFormMinutes] = useState<number | ''>('');
+  const [editFormResourceType, setEditFormResourceType] = useState<'material' | 'lecture'>('material');
 
   // Self-made safe inline deletion confirmation to bypass iPad browser iframe restrictions
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null);
@@ -96,7 +124,8 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
   // Manual New Item insertion form states
   const [activeAddTopicInChapter, setActiveAddTopicInChapter] = useState<{ subject: string, textbook: string, category: string } | null>(null);
   const [newTopicName, setNewTopicName] = useState('');
-  const [newTopicMinutes, setNewTopicMinutes] = useState(45);
+  const [newTopicMinutes, setNewTopicMinutes] = useState<number | ''>('');
+  const [newTopicResourceType, setNewTopicResourceType] = useState<'material' | 'lecture'>('material');
 
   // Manual Chapter / Textbook insertion form states
   const [activeAddChapterInTextbook, setActiveAddChapterInTextbook] = useState<string | null>(null); // subject::textbook
@@ -122,10 +151,13 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
       
       const matchSubject = selectedSubject === 'all' || t.subject === selectedSubject;
       const matchCategory = selectedCategory === 'all' || t.category === selectedCategory;
+      const matchResourceType = selectedResourceType === 'all' || 
+                                (selectedResourceType === 'material' && (t.resourceType === undefined || t.resourceType === 'material')) || 
+                                (selectedResourceType === 'lecture' && t.resourceType === 'lecture');
 
-      return matchSearch && matchSubject && matchCategory;
+      return matchSearch && matchSubject && matchCategory && matchResourceType;
     });
-  }, [topics, currentMode, searchQuery, selectedSubject, selectedCategory]);
+  }, [topics, currentMode, searchQuery, selectedSubject, selectedCategory, selectedResourceType]);
 
   // Custom Subject helper functions
   const saveSubjectOrder = (newOrder: string[]) => {
@@ -406,7 +438,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                 textbook: currentTextbook,
                 category: finalCategory,
                 name: item.cleanLine,
-                estimatedMinutes: 45,
+                estimatedMinutes: undefined,
                 isEssayOnly: currentSubject === '租税法' || currentSubject === '経営学' ? true : undefined
               });
             }
@@ -422,7 +454,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                 textbook: currentTextbook,
                 category: chapterName,
                 name: item.cleanLine,
-                estimatedMinutes: 45,
+                estimatedMinutes: undefined,
                 isEssayOnly: currentSubject === '租税法' || currentSubject === '経営学' ? true : undefined
               });
             }
@@ -465,11 +497,14 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
       textbook,
       category,
       name: newTopicName.trim(),
-      estimatedMinutes: newTopicMinutes
+      estimatedMinutes: newTopicMinutes === '' ? undefined : newTopicMinutes,
+      resourceType: newTopicResourceType
     };
 
     onUpdateTopics([...topics, freshTopic]);
     setNewTopicName('');
+    setNewTopicMinutes('');
+    setNewTopicResourceType('material');
     setActiveAddTopicInChapter(null);
   };
 
@@ -483,7 +518,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
       textbook,
       category: newChapterName.trim(),
       name: '（初期登録論点）ここへ復習論点を追加してください',
-      estimatedMinutes: 45
+      estimatedMinutes: undefined
     };
 
     onUpdateTopics([...topics, freshTopic]);
@@ -501,7 +536,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
       textbook: newTextbookName.trim(),
       category: '第1章 基本講義・論点一覧',
       name: '（初期登録論点）ここへ復習論点を追加してください',
-      estimatedMinutes: 45
+      estimatedMinutes: undefined
     };
 
     onUpdateTopics([...topics, freshTopic]);
@@ -515,7 +550,8 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
     setEditFormName(topic.name);
     setEditFormTextbook(topic.textbook || 'テキスト1');
     setEditFormCategory(topic.category);
-    setEditFormMinutes(topic.estimatedMinutes || 45);
+    setEditFormMinutes(topic.estimatedMinutes ?? '');
+    setEditFormResourceType(topic.resourceType || 'material');
   };
 
   const handleSaveInlineEdit = (id: string) => {
@@ -528,7 +564,8 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
           name: editFormName.trim(),
           textbook: editFormTextbook.trim(),
           category: editFormCategory.trim(),
-          estimatedMinutes: editFormMinutes
+          estimatedMinutes: editFormMinutes === '' ? undefined : editFormMinutes,
+          resourceType: editFormResourceType
         };
       }
       return t;
@@ -582,7 +619,7 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                 setSelectedSubject(e.target.value);
                 setSelectedCategory('all');
               }}
-              className="w-full sm:w-44 bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-2xl px-3.5 py-3 text-xs font-black text-slate-700 focus:outline-none transition-all cursor-pointer"
+              className="w-full sm:w-40 bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-2xl px-3 py-3 text-xs font-black text-slate-700 focus:outline-none transition-all cursor-pointer"
             >
               <option value="all">科目: すべて</option>
               {availableSubjects.map(sub => (
@@ -593,12 +630,22 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-44 bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-2xl px-3.5 py-3 text-xs font-black text-slate-700 focus:outline-none transition-all cursor-pointer"
+              className="w-full sm:w-40 bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-2xl px-3 py-3 text-xs font-black text-slate-700 focus:outline-none transition-all cursor-pointer"
             >
               <option value="all">各目次: すべて</option>
               {availableCategories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
+            </select>
+
+            <select
+              value={selectedResourceType}
+              onChange={(e) => setSelectedResourceType(e.target.value)}
+              className="w-full sm:w-32 bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white rounded-2xl px-3 py-3 text-xs font-black text-slate-700 focus:outline-none transition-all cursor-pointer"
+            >
+              <option value="all">区分: すべて</option>
+              <option value="material">教材のみ</option>
+              <option value="lecture">講義のみ</option>
             </select>
           </div>
         </div>
@@ -692,15 +739,30 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
 
             {/* Subject Reordering */}
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-150 space-y-2">
-              <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">科目順序の変更 (全 {subjectOrder.length} 科目)</label>
+              <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">科目順序の変更とテーマカラー設定 (全 {subjectOrder.length} 科目)</label>
               <div className="max-h-48 overflow-y-auto border border-slate-200 bg-white rounded-xl divide-y divide-slate-100">
                 {subjectOrder.map((sub, idx) => {
                   const modeExcluded = currentMode === 'short' && (sub === '租税法' || sub === '経営学');
                   return (
-                    <div key={sub} className="flex items-center justify-between p-2.5 hover:bg-slate-50/50">
-                      <div className="flex items-center gap-1.5 min-w-0">
+                    <div key={sub} className="flex items-center justify-between p-2.5 hover:bg-slate-55">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <span className="text-[10px] font-bold text-slate-400 w-4 font-mono">{idx + 1}</span>
-                        <span className={`text-xs font-black truncate ${modeExcluded ? 'text-slate-350 line-through' : 'text-slate-850'}`}>
+                        
+                        {/* Interactive Dynamic Theme Color Picker */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <input 
+                            type="color" 
+                            value={subjectColors[sub] || '#64748b'} 
+                            onChange={(e) => {
+                              const updatedColors = { ...subjectColors, [sub]: e.target.value };
+                              saveSubjectColors(updatedColors);
+                            }}
+                            className="w-7 h-7 rounded-full border border-slate-200 cursor-pointer overflow-hidden p-0 bg-transparent shrink-0"
+                            title="テーマカラー・アイコン色の変更"
+                          />
+                        </div>
+
+                        <span className={`text-xs font-black truncate ${modeExcluded ? 'text-slate-350 line-through' : ''}`} style={{ color: subjectColors[sub] || '#1e293b' }}>
                           {sub}
                         </span>
                         {modeExcluded && (
@@ -926,13 +988,33 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                   onClick={() => toggleSubject(subj)}
                   className="flex items-center gap-3.5 cursor-pointer flex-1"
                 >
-                  <div className="p-3 bg-slate-900 text-indigo-400 rounded-2xl shadow">
+                  <div 
+                    className="p-3 rounded-2xl shadow transition-colors duration-300"
+                    style={{ 
+                      backgroundColor: `${subjectColors[subj] || '#274a78'}1c`, // Soft 11% opacity color base
+                      color: subjectColors[subj] || '#274a78'
+                    }}
+                  >
                     <BookOpen className="w-5 h-5" />
                   </div>
                   <div className="text-left">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-sans font-black text-slate-900 tracking-tight text-sm uppercase">{subj}</h3>
-                      <span className="text-[9px] font-black bg-indigo-150/50 text-indigo-850 px-2 py-0.5 rounded-lg border border-indigo-100">CPAX</span>
+                      <h3 
+                        className="font-sans font-black tracking-tight text-sm uppercase transition-colors"
+                        style={{ color: subjectColors[subj] || '#1e293b' }}
+                      >
+                        {subj}
+                      </h3>
+                      <span 
+                        className="text-[9px] font-black px-2 py-0.5 rounded-lg border transition-colors"
+                        style={{ 
+                          borderColor: `${subjectColors[subj] || '#274a78'}40`,
+                          color: subjectColors[subj] || '#274a78',
+                          backgroundColor: `${subjectColors[subj] || '#274a78'}08`
+                        }}
+                      >
+                        CPAX
+                      </span>
                     </div>
                     <p className="text-[10px] text-slate-400 font-bold mt-0.5">
                       テキスト数: <span className="text-slate-700 font-extrabold">{textbooksList.length}個</span>
@@ -1145,8 +1227,35 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                                       {/* LEVEL 3 MANUAL TOPIC CREATION FORM */}
                                       {activeAddTopicInChapter?.category === categoryName && activeAddTopicInChapter?.textbook === tbookName && activeAddTopicInChapter?.subject === subj && (
                                         <div className="p-4 mx-4 border border-dashed border-slate-200 rounded-3xl bg-indigo-50/15 text-left space-y-3">
-                                          <h5 className="text-[10px] font-black text-slate-700">「{categoryName}」へ新規単体問題セルを追加登録</h5>
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                          <h5 className="text-[10px] font-black text-slate-700">「{categoryName}」へ新規項目（教材・講義）を追加登録</h5>
+                                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            <div>
+                                              <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">【区分：教材／講義】</label>
+                                              <div className="flex gap-2">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setNewTopicResourceType('material')}
+                                                  className={`flex-1 py-2 text-[10px] sm:text-xs font-black rounded-lg border transition-all cursor-pointer ${
+                                                    newTopicResourceType === 'material'
+                                                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                  }`}
+                                                >
+                                                  教材
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setNewTopicResourceType('lecture')}
+                                                  className={`flex-1 py-2 text-[10px] sm:text-xs font-black rounded-lg border transition-all cursor-pointer ${
+                                                    newTopicResourceType === 'lecture'
+                                                      ? 'bg-amber-500 border-amber-500 text-white shadow-sm'
+                                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                  }`}
+                                                >
+                                                  講義
+                                                </button>
+                                              </div>
+                                            </div>
                                             <div>
                                               <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">【論点・問題名称】</label>
                                               <input
@@ -1163,20 +1272,24 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                                                 <input
                                                   type="number"
                                                   min={1}
+                                                  placeholder="未設定 (空白)"
                                                   value={newTopicMinutes}
-                                                  onChange={(e) => setNewTopicMinutes(parseInt(e.target.value) || 45)}
-                                                  className="w-full bg-white border border-slate-200 text-xs py-2 px-3 rounded-lg font-black focus:outline-none"
+                                                  onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setNewTopicMinutes(val === "" ? "" : parseInt(val));
+                                                  }}
+                                                  className="w-full bg-white border border-slate-200 text-xs py-2 px-3 rounded-lg font-black focus:outline-none placeholder:text-slate-400"
                                                 />
                                               </div>
                                               <button
                                                 onClick={() => handleAddNewTopic(subj, tbookName, categoryName)}
-                                                className="px-4.5 py-2.5 bg-slate-900 text-white text-[10px] hover:bg-slate-800 font-black rounded-lg cursor-pointer shadow"
+                                                className="px-4.5 py-2.5 bg-slate-900 text-white text-[10px] hover:bg-slate-800 font-black rounded-lg cursor-pointer shadow shrink-0"
                                               >
                                                 登録
                                               </button>
                                               <button
                                                 onClick={() => setActiveAddTopicInChapter(null)}
-                                                className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-lg"
+                                                className="p-2.5 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-lg shrink-0"
                                               >
                                                 <X className="w-4 h-4" />
                                               </button>
@@ -1213,7 +1326,34 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                                                         <span className="text-[10px] text-slate-400 font-bold">復習カードの修正</span>
                                                       </div>
                                                       
-                                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+                                                        <div>
+                                                          <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">【区分：教材／講義】</label>
+                                                          <div className="flex gap-1.5">
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => setEditFormResourceType('material')}
+                                                              className={`flex-1 py-1.5 text-[10px] sm:text-xs font-black rounded-lg border transition-all cursor-pointer ${
+                                                                editFormResourceType === 'material'
+                                                                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                              }`}
+                                                            >
+                                                              教材
+                                                            </button>
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => setEditFormResourceType('lecture')}
+                                                              className={`flex-1 py-1.5 text-[10px] sm:text-xs font-black rounded-lg border transition-all cursor-pointer ${
+                                                                editFormResourceType === 'lecture'
+                                                                  ? 'bg-amber-500 border-amber-500 text-white shadow-sm'
+                                                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                              }`}
+                                                            >
+                                                              講義
+                                                            </button>
+                                                          </div>
+                                                        </div>
                                                         <div>
                                                           <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">論点 / 項目名称</label>
                                                           <input
@@ -1249,9 +1389,13 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                                                           <input
                                                             type="number"
                                                             min={1}
+                                                            placeholder="未設定 (空白)"
                                                             value={editFormMinutes}
-                                                            onChange={(e) => setEditFormMinutes(parseInt(e.target.value) || 45)}
-                                                            className="w-full bg-white border border-slate-200 text-xs py-2 px-3 rounded-lg font-bold focus:outline-none"
+                                                            onChange={(e) => {
+                                                              const val = e.target.value;
+                                                              setEditFormMinutes(val === "" ? "" : parseInt(val));
+                                                            }}
+                                                            className="w-full bg-white border border-slate-200 text-xs py-2 px-3 rounded-lg font-bold focus:outline-none placeholder:text-slate-400"
                                                           />
                                                         </div>
 
@@ -1305,6 +1449,13 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                                                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                                                         <div className="space-y-1 select-text">
                                                           <div className="flex flex-wrap items-center gap-1.5">
+                                                            <span className={`text-[8px] px-1.5 py-0.5 rounded font-black tracking-tight shrink-0 border ${
+                                                              topic.resourceType === 'lecture'
+                                                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                                : 'bg-indigo-50/70 text-indigo-700 border-indigo-200'
+                                                            }`}>
+                                                              {topic.resourceType === 'lecture' ? '講義' : '教材'}
+                                                            </span>
                                                             <span className="font-mono text-[8px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold tracking-wider border border-slate-200/40 shrink-0">
                                                               ID: {topic.id}
                                                             </span>
@@ -1327,18 +1478,15 @@ export const CpaxContentTree: React.FC<CpaxContentTreeProps> = ({
                                                                 type="number"
                                                                 min="1"
                                                                 max="999"
-                                                                value={topic.estimatedMinutes === 0 ? "" : (topic.estimatedMinutes ?? 45)}
+                                                                value={topic.estimatedMinutes === undefined || topic.estimatedMinutes === 0 ? "" : topic.estimatedMinutes}
                                                                 onChange={(e) => {
                                                                   const val = e.target.value;
-                                                                  const mins = val === "" ? 0 : parseInt(val);
-                                                                  const updated = topics.map(t => t.id === topic.id ? { ...t, estimatedMinutes: isNaN(mins) ? 0 : mins } : t);
+                                                                  const mins = val === "" ? undefined : parseInt(val);
+                                                                  const updated = topics.map(t => t.id === topic.id ? { ...t, estimatedMinutes: isNaN(mins!) ? undefined : mins } : t);
                                                                   onUpdateTopics(updated);
                                                                 }}
                                                                 onBlur={() => {
-                                                                  if (!topic.estimatedMinutes || topic.estimatedMinutes === 0) {
-                                                                    const updated = topics.map(t => t.id === topic.id ? { ...t, estimatedMinutes: 45 } : t);
-                                                                    onUpdateTopics(updated);
-                                                                  }
+                                                                  // Resilient empty onBlur, keeping empty if blank
                                                                 }}
                                                                 className="w-11 bg-slate-50 border border-slate-200 hover:bg-white focus:bg-white rounded px-1 py-0.5 text-center font-extrabold text-slate-800 text-[10px] focus:outline-none focus:ring-1 focus:ring-indigo-650/20 transition-all cursor-pointer shrink-0"
                                                                 title="標準学習時間をその場で直接変更"
