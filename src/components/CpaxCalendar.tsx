@@ -45,6 +45,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
   const [category, setCategory] = useState<'study' | 'private'>('study');
   const [associatedTopicId, setAssociatedTopicId] = useState<string>('');
   const [timeInput, setTimeInput] = useState('09:00');
+  const [isAllDay, setIsAllDay] = useState<boolean>(false);
   const [minutesInput, setMinutesInput] = useState<number>(60); // 用事の目安時間(分), 勉強目標(分)
 
   // CPAX マスター連携検索用の状態
@@ -221,6 +222,28 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
     return days;
   }, [year, month]);
 
+  // ヘルパー: タイトルを「[科目] テキスト・講義 ➜ 論点名」に統一する
+  const getDisplayTitle = (sched: CpaxSchedule) => {
+    if (sched.topicId) {
+      const topicObj = topics.find(t => t.id === sched.topicId);
+      if (topicObj) {
+        return `[${topicObj.subject}] ${topicObj.textbook || 'テキスト'} ➜ ${topicObj.name}`;
+      }
+    }
+    return sched.title;
+  };
+
+  // 行動チェックリスト用: 全てのインデントを表示する（[科目] テキスト・講義 ➜ 章・節 ➜ 論点名）
+  const getChecklistDisplayTitle = (sched: CpaxSchedule) => {
+    if (sched.topicId) {
+      const topicObj = topics.find(t => t.id === sched.topicId);
+      if (topicObj) {
+        return `[${topicObj.subject}] ${topicObj.textbook || 'テキスト'} ➜ ${topicObj.category} ➜ ${topicObj.name}`;
+      }
+    }
+    return sched.title;
+  };
+
   // Daily statistics
   const getSchedulesForDate = (dateStr: string) => {
     return schedules.filter(s => s.date === dateStr);
@@ -243,7 +266,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
       if (associatedTopicId) {
         const topicObj = topics.find(t => t.id === associatedTopicId);
         if (topicObj) {
-          finalTitle = `[${topicObj.subject}] ${topicObj.category} > ${topicObj.name}`;
+          finalTitle = `[${topicObj.subject}] ${topicObj.textbook || 'テキスト'} ➜ ${topicObj.name}`;
         }
       }
     } else {
@@ -255,7 +278,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
       selectedDateStr,
       category,
       category === 'study' && associatedTopicId ? associatedTopicId : undefined,
-      timeInput,
+      isAllDay ? '全日' : timeInput,
       targetMin,
       durMin
     );
@@ -264,13 +287,18 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
     setTitle('');
     setAssociatedTopicId('');
     setMinutesInput(60);
+    setIsAllDay(false);
   };
 
   // Selected day's computed plans
   const selectedDaySchedules = useMemo(() => {
     return schedules
       .filter(s => s.date === selectedDateStr)
-      .sort((a, b) => (a.timeInput || '').localeCompare(b.timeInput || ''));
+      .sort((a, b) => {
+        const timeA = a.timeInput === '全日' ? '00:00' : (a.timeInput || '99:99');
+        const timeB = b.timeInput === '全日' ? '00:00' : (b.timeInput || '99:99');
+        return timeA.localeCompare(timeB);
+      });
   }, [schedules, selectedDateStr]);
 
   // Total private duration & study headroom calculator
@@ -335,6 +363,57 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
           </div>
         </div>
 
+        {/* Selected Date Upper Detail Row */}
+        <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-inner">
+          <div className="space-y-0.5 shrink-0 text-left">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+              <span className="text-[9px] font-black tracking-widest text-indigo-500 uppercase font-mono">SELECTED DATE PLAN SUMMARY</span>
+            </div>
+            <h4 className="text-xs font-black text-slate-800">
+              {selectedDateStr.replace(/-/g, ' / ')} の予定詳細
+            </h4>
+          </div>
+          <div className="flex-1 overflow-hidden min-w-0">
+            {selectedDaySchedules.length === 0 ? (
+              <p className="text-xs text-slate-450 font-bold italic py-1 text-left">💡 この日の予定は未登録です（自習可能時間: 24h）</p>
+            ) : (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 select-none scrollbar-thin">
+                {selectedDaySchedules.map((sched) => {
+                  const isStudy = sched.category === 'study';
+                  const isCompleted = sched.completed;
+                  return (
+                    <button
+                      key={sched.scheduleId}
+                      type="button"
+                      onClick={() => onToggleSchedule(sched.scheduleId)}
+                      className={`shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold transition-all hover:scale-102 cursor-pointer active:scale-95 ${
+                        isCompleted
+                          ? 'bg-slate-150/40 border-slate-200 text-slate-400 line-through'
+                          : isStudy
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/80'
+                            : 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100/80'
+                      }`}
+                      title="クリックで完了/未完了を切替"
+                    >
+                      <span className="text-[11px] leading-none shrink-0">{isStudy ? '🎓' : '☕'}</span>
+                      {sched.timeInput && (
+                        <span className="font-mono text-[10px] bg-white px-1 py-0.2 rounded border border-slate-200/50 leading-none">
+                          {sched.timeInput}
+                        </span>
+                      )}
+                      <span className="max-w-[280px] truncate text-left">{getDisplayTitle(sched)}</span>
+                      <span className={`text-[10px] font-black shrink-0 ${isCompleted ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {isCompleted ? '✓' : '○'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Days of the week header */}
         <div className="grid grid-cols-7 text-center text-[10px] font-extrabold text-slate-400 py-1 uppercase tracking-widest">
           <div className="text-rose-500">SUN</div>
@@ -353,16 +432,12 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
             const isSelected = selectedDateStr === day.dateStr;
             const isToday = new Date().toISOString().split('T')[0] === day.dateStr;
 
-            // Compute counts
-            const studyCount = hasSchedules.filter(s => s.category === 'study').length;
-            const privateCount = hasSchedules.filter(s => s.category === 'private').length;
-
             return (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setSelectedDateStr(day.dateStr)}
-                className={`min-h-[76px] sm:min-h-[96px] text-left p-2 rounded-2xl border flex flex-col justify-between transition-all cursor-pointer relative ${
+                className={`min-h-[110px] text-left p-2 rounded-2xl border flex flex-col justify-between transition-all cursor-pointer relative ${
                   isSelected
                     ? 'border-indigo-600 bg-indigo-950 text-white shadow-md'
                     : isToday
@@ -391,21 +466,38 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                   </div>
                 )}
 
-                {/* Badges of daily schedule tasks */}
+                {/* Substantially detailed schedule title maps (up to 3 items) */}
                 {hasSchedules.length > 0 && (
-                  <div className="space-y-1 block w-full mt-1">
-                    {studyCount > 0 && (
-                      <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded leading-none truncate ${
-                        isSelected ? 'bg-indigo-900 text-indigo-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-100/50'
+                  <div className="space-y-0.5 block w-full mt-1.5 overflow-hidden flex-1">
+                    {hasSchedules.slice(0, 3).map((sched) => {
+                      const isStudy = sched.category === 'study';
+                      const isCompleted = sched.completed;
+                      return (
+                        <div
+                          key={sched.scheduleId}
+                          className={`text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded leading-tight truncate border flex items-center gap-1 ${
+                            isSelected
+                              ? isStudy
+                                ? 'bg-indigo-900 border-indigo-800 text-indigo-100'
+                                : 'bg-slate-800 border-slate-700 text-slate-200 font-medium'
+                              : isStudy
+                                ? `${isCompleted ? 'bg-emerald-50/50 text-emerald-700/60 border-emerald-100/30 line-through' : 'bg-emerald-50 text-emerald-800 border-emerald-100/60'}`
+                                : `${isCompleted ? 'bg-rose-50/50 text-rose-700/60 border-rose-100/30 line-through' : 'bg-rose-50 text-rose-800 border-rose-100/60'}`
+                          }`}
+                          title={`${isStudy ? '🎓' : '☕'} ${sched.timeInput || ''} ${getDisplayTitle(sched)}`}
+                        >
+                          <span className="shrink-0">{isStudy ? '🎓' : '☕'}</span>
+                          <span className="truncate flex-1 text-left">
+                            {getDisplayTitle(sched)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {hasSchedules.length > 3 && (
+                      <div className={`text-[7.5px] sm:text-[8px] text-center font-black py-0.5 rounded leading-none select-none ${
+                        isSelected ? 'text-indigo-300' : 'text-slate-400 bg-slate-100'
                       }`}>
-                        学 {studyCount}件
-                      </div>
-                    )}
-                    {privateCount > 0 && (
-                      <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded leading-none truncate ${
-                        isSelected ? 'bg-slate-800 text-slate-300' : 'bg-rose-50 text-rose-800 border border-rose-100/50'
-                      }`}>
-                        私 {privateCount}件
+                        他 {hasSchedules.length - 3} 件
                       </div>
                     )}
                   </div>
@@ -550,7 +642,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                           {sched.category === 'private' ? `私用: ${sched.duration || 0}分` : `目標: ${sched.targetMinutes || 0}分`}
                         </span>
                       </div>
-                      <p className="text-xs font-bold truncate text-slate-900">{sched.title}</p>
+                      <p className="text-xs font-bold truncate text-slate-900">{getChecklistDisplayTitle(sched)}</p>
                     </div>
                   </div>
 
@@ -572,16 +664,30 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
           <h4 className="font-bold text-slate-900 text-xs text-left">予定の新規追加</h4>
 
           <div className="flex items-center gap-3.5 w-full">
-            <div className="w-28 shrink-0">
-              <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">開始時刻</label>
+            <div className="w-36 shrink-0 text-left">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[8px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">開始時刻</label>
+                <label className="flex items-center gap-1 cursor-pointer select-none leading-none">
+                  <input
+                    type="checkbox"
+                    checked={isAllDay}
+                    onChange={(e) => setIsAllDay(e.target.checked)}
+                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5"
+                  />
+                  <span className="text-[9px] font-black text-slate-500 leading-none">全日</span>
+                </label>
+              </div>
               <input
                 type="time"
-                value={timeInput}
+                value={isAllDay ? "00:00" : timeInput}
+                disabled={isAllDay}
                 onChange={(e) => setTimeInput(e.target.value)}
-                className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl px-2 py-2 text-xs font-bold focus:outline-none min-h-[44px] text-center"
+                className={`w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl px-2 py-2 text-xs font-bold focus:outline-none min-h-[44px] text-center ${
+                  isAllDay ? 'opacity-40 bg-slate-100 cursor-not-allowed' : ''
+                }`}
               />
             </div>
-            <div className="w-40 shrink-0 ml-auto">
+            <div className="flex-1 min-w-0">
               <label className="block text-[8px] font-extrabold text-indigo-900/60 uppercase tracking-widest mb-1">計画タイプ</label>
               <select
                 value={category}
@@ -681,7 +787,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                       setAssociatedTopicId(id);
                       const topicObj = topics.find(t => t.id === id);
                       if (topicObj) {
-                        setTitle(`[${topicObj.subject}] ${topicObj.category} > ${topicObj.name}`);
+                        setTitle(`[${topicObj.subject}] ${topicObj.textbook || 'テキスト'} ➜ ${topicObj.name}`);
                         setMinutesInput(topicObj.estimatedMinutes || 45); // 指標目安時間を自動インジェクション
                       } else {
                         setTitle('');
@@ -692,7 +798,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                     <option value="">-- 自習（目次に紐付けないフリー勉強） --</option>
                     {filteredTopicsForSelect.map(t => (
                       <option key={t.id} value={t.id}>
-                        [{t.subject}] {t.textbook || 'テキスト'} ➜ {t.category} ➜ {t.name}
+                        [{t.subject}] {t.textbook || 'テキスト'} ➜ {t.name}
                       </option>
                     ))}
                   </select>
