@@ -14,13 +14,13 @@ interface CpaxCalendarProps {
   onAddSchedule: (
     title: string,
     date: string,
-    category: 'study' | 'private',
+    category: 'study' | 'private' | 'other',
     topicId?: string,
     timeInput?: string,
     targetMinutes?: number,
     duration?: number
   ) => void;
-  onToggleSchedule: (scheduleId: string) => void;
+  onToggleSchedule: (scheduleId: string, evaluation?: 'good' | 'average' | 'poor') => void;
   onDeleteSchedule: (scheduleId: string) => void;
   targetDateStr?: string;
   targetTitle?: string;
@@ -42,7 +42,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
 
   // Form states to create plans
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<'study' | 'private'>('study');
+  const [category, setCategory] = useState<'study' | 'private' | 'other'>('study');
   const [associatedTopicId, setAssociatedTopicId] = useState<string>('');
   const [timeInput, setTimeInput] = useState('09:00');
   const [isAllDay, setIsAllDay] = useState<boolean>(false);
@@ -303,9 +303,9 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
 
   // Total private duration & study headroom calculator
   const { totalPrivateMinutes, availableStudyHours, totalPlannedStudyMinutes, isOverloaded } = useMemo(() => {
-    // Sum private duration (minutes)
+    // Sum private/other duration (minutes)
     const privateMinutesSum = selectedDaySchedules
-      .filter(s => s.category === 'private')
+      .filter(s => s.category === 'private' || s.category === 'other')
       .reduce((sum, s) => sum + (s.duration || 0), 0);
 
     // Physical balance from 24h
@@ -381,6 +381,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
               <div className="flex items-center gap-2 overflow-x-auto pb-1 select-none scrollbar-thin">
                 {selectedDaySchedules.map((sched) => {
                   const isStudy = sched.category === 'study';
+                  const isOther = sched.category === 'other';
                   const isCompleted = sched.completed;
                   return (
                     <button
@@ -392,19 +393,39 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                           ? 'bg-slate-150/40 border-slate-200 text-slate-400 line-through'
                           : isStudy
                             ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/80'
-                            : 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100/80'
+                            : isOther
+                              ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100/80'
+                              : 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100/80'
                       }`}
                       title="クリックで完了/未完了を切替"
                     >
-                      <span className="text-[11px] leading-none shrink-0">{isStudy ? '🎓' : '☕'}</span>
+                      <span className="text-[11px] leading-none shrink-0">{isStudy ? '🎓' : isOther ? '🤝' : '☕'}</span>
                       {sched.timeInput && (
                         <span className="font-mono text-[10px] bg-white px-1 py-0.2 rounded border border-slate-200/50 leading-none">
                           {sched.timeInput}
                         </span>
                       )}
                       <span className="max-w-[280px] truncate text-left">{getDisplayTitle(sched)}</span>
-                      <span className={`text-[10px] font-black shrink-0 ${isCompleted ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        {isCompleted ? '✓' : '○'}
+                      <span className={`text-[10px] font-black shrink-0 ${
+                        isCompleted
+                          ? isStudy && sched.evaluation
+                            ? sched.evaluation === 'good'
+                              ? 'text-emerald-600 font-extrabold'
+                              : sched.evaluation === 'average'
+                                ? 'text-amber-500 font-extrabold'
+                                : 'text-rose-500 font-extrabold'
+                            : 'text-indigo-600'
+                          : 'text-slate-400'
+                      }`}>
+                        {isCompleted
+                          ? isStudy && sched.evaluation
+                            ? sched.evaluation === 'good'
+                              ? '◯'
+                              : sched.evaluation === 'average'
+                                ? '△'
+                                : '✕'
+                            : '✓'
+                          : '○'}
                       </span>
                     </button>
                   );
@@ -471,6 +492,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                   <div className="space-y-0.5 block w-full mt-1.5 overflow-hidden flex-1">
                     {hasSchedules.slice(0, 3).map((sched) => {
                       const isStudy = sched.category === 'study';
+                      const isOther = sched.category === 'other';
                       const isCompleted = sched.completed;
                       return (
                         <div
@@ -479,14 +501,18 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
                             isSelected
                               ? isStudy
                                 ? 'bg-indigo-900 border-indigo-800 text-indigo-100'
-                                : 'bg-slate-800 border-slate-700 text-slate-200 font-medium'
+                                : isOther
+                                  ? 'bg-blue-900 border-blue-800 text-blue-100'
+                                  : 'bg-slate-800 border-slate-700 text-slate-200 font-medium'
                               : isStudy
                                 ? `${isCompleted ? 'bg-emerald-50/50 text-emerald-700/60 border-emerald-100/30 line-through' : 'bg-emerald-50 text-emerald-800 border-emerald-100/60'}`
-                                : `${isCompleted ? 'bg-rose-50/50 text-rose-700/60 border-rose-100/30 line-through' : 'bg-rose-50 text-rose-800 border-rose-100/60'}`
+                                : isOther
+                                  ? `${isCompleted ? 'bg-blue-50/50 text-blue-700/60 border-blue-100/30 line-through' : 'bg-blue-50 text-blue-800 border-blue-100/60'}`
+                                  : `${isCompleted ? 'bg-rose-50/50 text-rose-700/60 border-rose-100/30 line-through' : 'bg-rose-50 text-rose-800 border-rose-100/60'}`
                           }`}
-                          title={`${isStudy ? '🎓' : '☕'} ${sched.timeInput || ''} ${getDisplayTitle(sched)}`}
+                          title={`${isStudy ? '🎓' : isOther ? '🤝' : '☕'} ${sched.timeInput || ''} ${getDisplayTitle(sched)}`}
                         >
-                          <span className="shrink-0">{isStudy ? '🎓' : '☕'}</span>
+                          <span className="shrink-0">{isStudy ? '🎓' : isOther ? '🤝' : '☕'}</span>
                           <span className="truncate flex-1 text-left">
                             {getDisplayTitle(sched)}
                           </span>
@@ -605,56 +631,112 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
             </div>
           ) : (
             <div className="space-y-2">
-              {selectedDaySchedules.map(sched => (
-                <div
-                  key={sched.scheduleId}
-                  className={`p-3 rounded-2xl border transition-all flex items-center justify-between ${
-                    sched.completed
-                      ? 'bg-slate-50/70 border-slate-100 text-slate-400 line-through'
-                      : sched.category === 'private'
-                        ? 'bg-rose-50/30 border-rose-100/40 text-slate-800'
-                        : 'bg-white border-slate-100 text-slate-800 shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 overflow-hidden flex-1 text-left">
-                    <button
-                      type="button"
-                      onClick={() => onToggleSchedule(sched.scheduleId)}
-                      className="p-1 cursor-pointer transition-transform hover:scale-110 shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                      title="完了トグル"
-                    >
-                      {sched.completed ? (
-                        <CheckSquare className="w-5 h-5 text-emerald-600" />
-                      ) : (
-                        <Square className="w-5 h-5 text-slate-400" />
-                      )}
-                    </button>
-                    <div className="overflow-hidden flex-1 space-y-0.5">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {sched.timeInput && (
-                          <span className="text-[9px] font-mono font-bold bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 leading-none">
-                            {sched.timeInput}
-                          </span>
-                        )}
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none ${
-                          sched.category === 'private' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
-                        }`}>
-                          {sched.category === 'private' ? `私用: ${sched.duration || 0}分` : `目標: ${sched.targetMinutes || 0}分`}
-                        </span>
-                      </div>
-                      <p className="text-xs font-bold truncate text-slate-900">{getChecklistDisplayTitle(sched)}</p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => onDeleteSchedule(sched.scheduleId)}
-                    className="p-2.5 text-slate-300 hover:text-rose-600 transition-colors cursor-pointer shrink-0 ml-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    title="計画を削除"
+              {selectedDaySchedules.map(sched => {
+                const isStudy = sched.category === 'study';
+                const isOther = sched.category === 'other';
+                return (
+                  <div
+                    key={sched.scheduleId}
+                    className={`p-3 rounded-2xl border transition-all flex items-center justify-between ${
+                      sched.completed
+                        ? 'bg-slate-50/70 border-slate-100 text-slate-400 line-through'
+                        : isOther
+                          ? 'bg-blue-50/30 border-blue-100/40 text-slate-800'
+                          : sched.category === 'private'
+                            ? 'bg-rose-50/30 border-rose-100/40 text-slate-800'
+                            : 'bg-white border-slate-100 text-slate-800 shadow-sm'
+                    }`}
                   >
-                    <Trash className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-2.5 overflow-hidden flex-1 text-left">
+                      {isStudy ? (
+                        <div className="flex items-center gap-1 shrink-0 select-none mr-2">
+                          <button
+                            type="button"
+                            onClick={() => onToggleSchedule(sched.scheduleId, 'good')}
+                            className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 cursor-pointer ${
+                              sched.completed && sched.evaluation === 'good'
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/30'
+                                : 'bg-white text-emerald-600 border-emerald-300 hover:bg-emerald-50'
+                            }`}
+                            title="理解度：◯ (完全に理解して完了)"
+                          >
+                            ◯
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onToggleSchedule(sched.scheduleId, 'average')}
+                            className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 cursor-pointer ${
+                              sched.completed && sched.evaluation === 'average'
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-500/30'
+                                : 'bg-white text-amber-600 border-amber-300 hover:bg-amber-50'
+                            }`}
+                            title="理解度：△ (やや不安ありで完了)"
+                          >
+                            △
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onToggleSchedule(sched.scheduleId, 'poor')}
+                            className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-black transition-all hover:scale-110 cursor-pointer ${
+                              sched.completed && sched.evaluation === 'poor'
+                                ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/30'
+                                : 'bg-white text-rose-600 border-rose-300 hover:bg-rose-50'
+                            }`}
+                            title="理解度：✕ (要復習として完了)"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onToggleSchedule(sched.scheduleId)}
+                          className="p-1 cursor-pointer transition-transform hover:scale-110 shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          title="完了トグル"
+                        >
+                          {sched.completed ? (
+                            <CheckSquare className="w-5 h-5 text-indigo-600" />
+                          ) : (
+                            <Square className="w-5 h-5 text-slate-400" />
+                          )}
+                        </button>
+                      )}
+                      
+                      <div className="overflow-hidden flex-1 space-y-0.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {sched.timeInput && (
+                            <span className="text-[9px] font-mono font-bold bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 leading-none">
+                              {sched.timeInput}
+                            </span>
+                          )}
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none ${
+                            isStudy
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : isOther
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-rose-100 text-rose-700'
+                          }`}>
+                            {isStudy
+                              ? `目標: ${sched.targetMinutes || 0}分`
+                              : isOther
+                                ? `面談他: ${sched.duration || 0}分`
+                                : `私用: ${sched.duration || 0}分`}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold truncate text-slate-900">{getChecklistDisplayTitle(sched)}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => onDeleteSchedule(sched.scheduleId)}
+                      className="p-2.5 text-slate-300 hover:text-rose-600 transition-colors cursor-pointer shrink-0 ml-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      title="計画を削除"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -692,11 +774,14 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
               <select
                 value={category}
                 onChange={(e) => {
-                  const val = e.target.value as 'study' | 'private';
+                  const val = e.target.value as 'study' | 'private' | 'other';
                   setCategory(val);
                   if (val === 'private') {
                     setTitle('');
                     setMinutesInput(120); // 私用の初期値 120分
+                  } else if (val === 'other') {
+                    setTitle('');
+                    setMinutesInput(60); // 面談などの初期値 60分
                   } else {
                     setMinutesInput(60); // 勉強初期値 60分
                   }
@@ -705,6 +790,7 @@ export const CpaxCalendar: React.FC<CpaxCalendarProps> = ({
               >
                 <option value="study">🎓 学習計画</option>
                 <option value="private">☕ プライベート用事</option>
+                <option value="other">🤝 面談・その他</option>
               </select>
             </div>
           </div>

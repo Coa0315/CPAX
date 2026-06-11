@@ -39,13 +39,14 @@ export interface CpaxSchedule {
   topicId?: string; // Optional links to unified syllabus (cpaxTopicId)
   title: string; // Event or Study task name
   date: string; // YYYY-MM-DD
-  category: 'study' | 'private'; // study, private
+  category: 'study' | 'private' | 'other'; // study, private, other
   completed: boolean;
   timeInput?: string; // e.g. "14:00"
   notes?: string;
   sourceExamReportId?: string; // If auto-scheduled from reflections (e.g. 3 days after)
   duration?: number; // Private task commitment minutes
   targetMinutes?: number; // Study task target minutes
+  evaluation?: 'good' | 'average' | 'poor'; // "◯" | "△" | "✕"
 }
 
 // Exam Reflection and reports (答練・公開模試)

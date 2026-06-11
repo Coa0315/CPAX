@@ -122,7 +122,7 @@ export default function App() {
   const handleAddSchedule = (
     title: string,
     date: string,
-    category: 'study' | 'private',
+    category: 'study' | 'private' | 'other',
     topicId?: string,
     timeInput?: string,
     targetMinutes?: number,
@@ -146,14 +146,16 @@ export default function App() {
   };
 
   // Toggle todo item
-  const handleToggleSchedule = (scheduleId: string) => {
+  const handleToggleSchedule = (scheduleId: string, evaluation?: 'good' | 'average' | 'poor') => {
     let freshSavedHistoryItem: CpaxHistoryItem | null = null;
     let autoAddedToHistory = false;
     let shouldRemoveFromHistory = false;
 
     const nextSchedules = schedules.map(s => {
       if (s.scheduleId === scheduleId) {
-        const nextCompleted = !s.completed;
+        const isSameEval = evaluation && s.evaluation === evaluation;
+        const nextCompleted = isSameEval || (!evaluation && s.completed) ? false : true;
+        const nextEval = nextCompleted ? (evaluation || s.evaluation || 'good') : undefined;
         
         // 完了チェック時に勉強予定で論点IDが紐づいている場合、目次履歴(cpax_history)へ自動送信
         if (nextCompleted && s.category === 'study' && s.topicId) {
@@ -165,7 +167,7 @@ export default function App() {
             topicId: s.topicId,
             date: s.date,
             duration: minutes,
-            evaluation: 'good', // デフォルト自己評価 ◯ (good)
+            evaluation: nextEval || 'good',
             type: 'manual',
             note: 'カレンダー行動表の完了チェックによる自動実績同期。',
             scheduleId: s.scheduleId // Link schedule ID
@@ -176,7 +178,7 @@ export default function App() {
           shouldRemoveFromHistory = true;
         }
 
-        return { ...s, completed: nextCompleted };
+        return { ...s, completed: nextCompleted, evaluation: nextEval };
       }
       return s;
     });
@@ -185,7 +187,8 @@ export default function App() {
     localStorage.setItem('cpax_schedules', JSON.stringify(nextSchedules));
 
     if (autoAddedToHistory && freshSavedHistoryItem) {
-      const nextHistory = [...history, freshSavedHistoryItem];
+      const filteredHistory = history.filter(h => h.scheduleId !== scheduleId);
+      const nextHistory = [...filteredHistory, freshSavedHistoryItem];
       setHistory(nextHistory);
       localStorage.setItem('cpax_history', JSON.stringify(nextHistory));
     } else if (shouldRemoveFromHistory) {
